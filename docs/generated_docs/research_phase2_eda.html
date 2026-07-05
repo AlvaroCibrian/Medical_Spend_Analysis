@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Fase Día 2 — Análisis Exploratorio de Datos (EDA)</title>
+<style>
+  @page { margin: 2cm; }
+  body { font-family: "Liberation Serif", Georgia, serif; font-size: 12pt; line-height: 1.5; color: #1a1a1a; margin: 0; }
+  h1 { font-family: "Liberation Sans", Arial, sans-serif; font-size: 21pt; color: #0b3d5c; border-bottom: 3px solid #0b3d5c; padding-bottom: 6px; }
+  h2 { font-family: "Liberation Sans", Arial, sans-serif; font-size: 15pt; color: #0b3d5c; margin-top: 20px; border-left: 5px solid #2a80b9; padding-left: 8px; }
+  h3 { font-family: "Liberation Sans", Arial, sans-serif; font-size: 12.5pt; color: #23566e; margin-bottom: 4px; }
+  code, .mono { font-family: "Liberation Mono", "Courier New", monospace; font-size: 10.5pt; }
+  pre { background: #f4f6f8; border: 1px solid #d6dde2; border-radius: 4px; padding: 8px 10px; font-family: "Liberation Mono", monospace; font-size: 9.5pt; white-space: pre-wrap; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 10.5pt; }
+  th, td { border: 1px solid #b8c4cc; padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: #e7eef3; color: #0b3d5c; }
+  .formula { background: #f0f5fa; border: 1px solid #cfe0ee; border-radius: 5px; padding: 10px 14px; margin: 12px 0; text-align: center; font-size: 12pt; }
+  .formula .name { display:block; font-size: 9.5pt; color:#0b3d5c; font-family:"Liberation Sans",Arial,sans-serif; margin-bottom:6px; letter-spacing:.5px; }
+  .callout { background: #fff8e1; border-left: 5px solid #f0ad4e; padding: 8px 12px; margin: 12px 0; }
+  .verify { background: #eaf7ea; border-left: 5px solid #4caf50; padding: 8px 12px; margin: 12px 0; }
+  .warn { background: #fdecea; border-left: 5px solid #e15241; padding: 8px 12px; margin: 12px 0; }
+  .dep { background: #eef2fb; border-left: 5px solid #3f51b5; padding: 8px 12px; margin: 12px 0; }
+  .cover-sub { color: #555; font-size: 12pt; }
+  .tag { font-family: "Liberation Sans", Arial, sans-serif; font-size: 9pt; background:#0b3d5c; color:#fff; padding:2px 8px; border-radius: 10px; }
+  a { color: #1a5f8a; } .small { font-size: 9.5pt; color: #555; }
+  .var { font-style: italic; }
+</style>
+</head>
+<body>
+
+<p><span class="tag">FASE · DÍA 2 · Serie de fases PIA TSCI 3 · Equipo 3</span></p>
+<h1>Análisis Exploratorio de Datos (EDA)</h1>
+<p class="cover-sub">Entregable: <code>01_eda.ipynb</code> · Responsables: Diego, Yazmin, Juan Pablo · Punto de partida: <code>00_setup.ipynb</code>.</p>
+<p class="small">Investigación de apoyo para ejecutar esta fase. Explica el <em>qué</em>, el <em>por qué</em> y el <em>cómo</em>, con las fórmulas y el código comentados, pensada para que la entiendan tanto una persona sin experiencia como una IA colaboradora. Fuentes científicas citadas en formato APA al final.</p>
+
+<h2>1. Objetivo de la fase</h2>
+<p>El <strong>Análisis Exploratorio de Datos</strong> (EDA, por sus siglas en inglés) es el proceso de «conocer» los datos antes de modelarlos: ver cómo se distribuye cada variable, detectar valores extraños y descubrir relaciones. Fue formalizado por el estadístico <strong>John Tukey</strong> (1977), quien propuso usar gráficas simples para dejar que los datos «hablen» antes de imponerles un modelo. En CRISP-DM esta fase es la <em>Comprensión de los datos</em> (Chapman et al., 2000).</p>
+
+<div class="dep"><strong>🔌 Cableado / dependencias (léelo aunque no seas de esta fase).</strong>
+<ul>
+  <li><strong>Recibe de Día 1 (setup):</strong> el <code>DataFrame</code> ya cargado y sin duplicados (1 337 filas, 0 nulos). Cárgalo con <code>pd.read_csv("../data/insurance.csv").drop_duplicates()</code>.</li>
+  <li><strong>Entrega a Día 3 (correlación) y Día 5 (clustering):</strong> el conocimiento de qué variables están sesgadas y dónde hay outliers. La decisión que tomes sobre outliers (conservarlos o no) <strong>afecta directamente</strong> la correlación (Día 3), la regresión (Día 4) y el clustering (Día 5). Documenta esa decisión con claridad.</li>
+  <li><strong>Genera archivos:</strong> guarda todas las gráficas en <code>reports/figures/</code> con <code>plt.savefig()</code>. El equipo del Documento PDF (Día 7) usará esas imágenes.</li>
+</ul>
+</div>
+
+<h2>2. Detección de valores atípicos (outliers)</h2>
+<p>Un <strong>outlier</strong> es un valor mucho más grande o más pequeño que el resto. Importa porque puede <em>arrastrar</em> la media y distorsionar modelos. El método estándar es la <strong>regla del rango intercuartílico (IQR)</strong> de Tukey.</p>
+<div class="formula"><span class="name">RANGO INTERCUARTÍLICO Y VALLAS DE TUKEY</span><br>
+IQR = Q₃ − Q₁ &nbsp;&nbsp;;&nbsp;&nbsp; valla inferior = Q₁ − 1.5·IQR &nbsp;&nbsp;;&nbsp;&nbsp; valla superior = Q₃ + 1.5·IQR
+</div>
+<p><strong>En español:</strong> Q₁ (primer cuartil) es el valor que deja por debajo al 25% de los datos; Q₃ (tercer cuartil), al 75%. El IQR es el ancho del «bloque central» del 50% de los datos. Todo lo que caiga <em>más allá</em> de 1.5 veces ese ancho por arriba o por abajo se considera atípico. El factor <strong>1.5</strong> no es arbitrario: Tukey lo eligió porque, en una distribución normal, deja fuera solo ~0.7% de los datos (Tukey, 1977; los detalles del porqué se discuten en la literatura de EDA).</p>
+<pre>import seaborn as sns, matplotlib.pyplot as plt
+sns.boxplot(x=df["bmi"]); plt.title("Outliers en IMC"); plt.savefig("../reports/figures/box_bmi.png", dpi=150, bbox_inches="tight"); plt.show()
+sns.boxplot(x=df["charges"]); plt.title("Outliers en cargos"); plt.savefig("../reports/figures/box_charges.png", dpi=150, bbox_inches="tight"); plt.show()</pre>
+<h3>Cómo leer un boxplot (diagrama de caja)</h3>
+<p>La <strong>caja</strong> va de Q₁ a Q₃ (el 50% central). La <strong>línea dentro</strong> es la mediana. Los <strong>bigotes</strong> se extienden hasta las vallas de Tukey. Los <strong>puntos sueltos</strong> más allá de los bigotes son los outliers. En <code>charges</code> verás varios puntos altos: son personas con gastos muy elevados.</p>
+<div class="callout"><strong>Decisión recomendada.</strong> En este dataset los outliers de <code>charges</code> y <code>bmi</code> son <strong>casos reales</strong> (personas que de verdad gastan mucho o tienen IMC alto), no errores de captura. Por eso <strong>se conservan</strong>: eliminarlos borraría justo a los perfiles de mayor riesgo, que son el foco del proyecto. Documenta esta decisión en el notebook.</div>
+
+<h2>3. Distribución de variables numéricas (histogramas)</h2>
+<p>Un <strong>histograma</strong> muestra cuántos registros caen en cada rango de valores; revela la <em>forma</em> de la distribución.</p>
+<pre>for col in ["age", "bmi", "children", "charges"]:
+    sns.histplot(df[col], kde=True)
+    plt.title(f"Distribución de {col}")
+    plt.savefig(f"../reports/figures/hist_{col}.png", dpi=150, bbox_inches="tight"); plt.show()
+print(df[["age","bmi","children","charges"]].skew())   # asimetría numérica</pre>
+<h3>Sesgo (asimetría) y por qué importa</h3>
+<p>Una distribución es <strong>simétrica</strong> si su forma es un «campana» equilibrada. Es <strong>sesgada a la derecha</strong> (asimetría positiva) si tiene una cola larga hacia los valores altos. El coeficiente de asimetría (<em>skewness</em>) lo cuantifica: ≈0 simétrica, &gt;0 cola a la derecha, &lt;0 cola a la izquierda.</p>
+<div class="verify"><strong>Qué vas a observar (verificado):</strong> <code>charges</code> está <strong>fuertemente sesgada a la derecha</strong> (skew ≈ +1.5): la mayoría gasta poco y unos pocos gastan muchísimo. <code>bmi</code> es casi simétrica; <code>age</code> es bastante plana (uniforme).</div>
+<div class="warn"><strong>Conexión con la Fase Día 4 (regresión).</strong> El sesgo de <code>charges</code> tiene consecuencias: la regresión lineal supone errores de varianza constante (homocedasticidad), y una variable objetivo tan sesgada suele violar ese supuesto. Una mejora conocida es modelar <strong>log(charges)</strong>, que «desinfla» la cola y acerca la distribución a la normal (Feng et al., 2014; Field, 2018). Menciónaselo al equipo de regresión.</div>
+
+<h2>4. Distribución de variables categóricas (countplots)</h2>
+<p>Para variables de texto (categorías) se cuenta cuántos registros hay de cada una con un <strong>gráfico de barras</strong>.</p>
+<pre>for col in ["sex", "smoker", "region"]:
+    sns.countplot(x=col, data=df); plt.title(f"Frecuencia de {col}")
+    plt.savefig(f"../reports/figures/count_{col}.png", dpi=150, bbox_inches="tight"); plt.show()</pre>
+<div class="verify"><strong>Qué vas a observar:</strong> <code>sex</code> está casi 50/50; <code>region</code> reparte ~25% cada una; <code>smoker</code> está <strong>desbalanceada</strong>: solo ~20% son fumadores (274 de 1 337). Ese desbalance es importante para interpretar por qué, pese a ser minoría, los fumadores mueven tanto el gasto promedio.</div>
+
+<h2>5. Relación visual entre variables (scatterplots)</h2>
+<p>Un <strong>diagrama de dispersión</strong> coloca un punto por persona y revela relaciones entre dos variables. Colorear por <code>smoker</code> (<code>hue</code>) anticipa el hallazgo central.</p>
+<pre>sns.scatterplot(x="age", y="charges", hue="smoker", data=df)
+plt.title("Edad vs Cargos (color = fumador)"); plt.savefig("../reports/figures/scatter_age.png", dpi=150, bbox_inches="tight"); plt.show()
+sns.scatterplot(x="bmi", y="charges", hue="smoker", data=df)
+plt.title("IMC vs Cargos (color = fumador)"); plt.savefig("../reports/figures/scatter_bmi.png", dpi=150, bbox_inches="tight"); plt.show()</pre>
+<h3>Cómo interpretar estas gráficas</h3>
+<ul>
+  <li><strong>Edad vs cargos:</strong> verás tres «bandas» que suben con la edad. Los fumadores (un color) ocupan las bandas superiores → gastan más a cualquier edad.</li>
+  <li><strong>IMC vs cargos:</strong> aquí aparece una <strong>interacción</strong> clave: entre <em>no fumadores</em> el IMC casi no cambia el gasto; entre <em>fumadores</em>, a mayor IMC el gasto se dispara. Esta interacción explica por qué la correlación lineal simple de IMC parece débil aunque el IMC sí importa (para fumadores).</li>
+</ul>
+
+<h2>6. Buenas prácticas y errores comunes</h2>
+<table>
+  <tr><th width="45%">Haz esto</th><th width="55%">Evita esto</th></tr>
+  <tr><td>Titular y etiquetar cada gráfica (<code>title</code>, ejes).</td><td>Gráficas sin contexto que nadie entiende después.</td></tr>
+  <tr><td>Documentar en Markdown qué se observa en cada celda.</td><td>Solo pegar gráficas sin interpretar.</td></tr>
+  <tr><td>Guardar todo en <code>reports/figures/</code> con <code>bbox_inches="tight"</code>.</td><td>Perder las imágenes que necesita el Día 7.</td></tr>
+  <tr><td>Justificar la decisión sobre outliers.</td><td>Borrar outliers «porque sí» y sesgar el análisis.</td></tr>
+</table>
+
+<h2>7. Checklist del entregable (<code>01_eda.ipynb</code>)</h2>
+<ul>
+  <li>☐ Boxplots de <code>bmi</code> y <code>charges</code> + decisión sobre outliers documentada.</li>
+  <li>☐ Histogramas de <code>age, bmi, children, charges</code> + comentario de sesgo.</li>
+  <li>☐ Countplots de <code>sex, smoker, region</code>.</li>
+  <li>☐ Al menos 2 scatterplots (<code>age</code> y <code>bmi</code> vs <code>charges</code>) coloreados por <code>smoker</code>.</li>
+  <li>☐ Todas las figuras guardadas en <code>reports/figures/</code>.</li>
+  <li>☐ Cada celda documentada con Markdown.</li>
+</ul>
+
+<h2>Referencias (APA 7)</h2>
+<p class="small">
+Chapman, P., Clinton, J., Kerber, R., Khabaza, T., Reinartz, T., Shearer, C., &amp; Wirth, R. (2000). <em>CRISP-DM 1.0: Step-by-step data mining guide</em>. SPSS Inc.<br><br>
+Feng, C., Wang, H., Lu, N., Chen, T., He, H., Lu, Y., &amp; Tu, X. M. (2014). Log-transformation and its implications for data analysis. <em>Shanghai Archives of Psychiatry, 26</em>(2), 105–109. https://doi.org/10.3969/j.issn.1002-0829.2014.02.009<br><br>
+Field, A. (2018). <em>Discovering statistics using IBM SPSS statistics</em> (5th ed.). SAGE Publications.<br><br>
+McKinney, W. (2017). <em>Python for data analysis: Data wrangling with pandas, NumPy, and IPython</em> (2nd ed.). O'Reilly Media.<br><br>
+Tukey, J. W. (1977). <em>Exploratory data analysis</em>. Addison-Wesley.<br><br>
+Waskom, M. L. (2021). seaborn: Statistical data visualization. <em>Journal of Open Source Software, 6</em>(60), 3021. https://doi.org/10.21105/joss.03021
+</p>
+
+</body>
+</html>

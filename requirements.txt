@@ -114,3 +114,10 @@ webcolors==25.10.0
 webencodings==0.5.1
 websocket-client==1.9.0
 widgetsnbextension==4.0.15
+
+# --- Generacion de documentos (Word / PowerPoint / Excel) ---
+# Se usan para CREAR archivos nativos con Python; luego LibreOffice los
+# convierte a PDF u otros formatos (ver scripts/README.md).
+python-docx==1.1.2
+python-pptx==1.0.2
+openpyxl==3.1.5

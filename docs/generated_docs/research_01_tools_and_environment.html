@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Investigación 1 — Herramientas y entorno de trabajo</title>
+<style>
+  @page { margin: 2.2cm; }
+  body { font-family: "Liberation Serif", Georgia, serif; font-size: 12pt; line-height: 1.5; color: #1a1a1a; margin: 0; }
+  h1 { font-family: "Liberation Sans", Arial, sans-serif; font-size: 22pt; color: #0b3d5c; border-bottom: 3px solid #0b3d5c; padding-bottom: 6px; }
+  h2 { font-family: "Liberation Sans", Arial, sans-serif; font-size: 15pt; color: #0b3d5c; margin-top: 22px; border-left: 5px solid #2a80b9; padding-left: 8px; }
+  h3 { font-family: "Liberation Sans", Arial, sans-serif; font-size: 12.5pt; color: #23566e; margin-bottom: 4px; }
+  code, .mono { font-family: "Liberation Mono", "Courier New", monospace; font-size: 10.5pt; }
+  pre { background: #f4f6f8; border: 1px solid #d6dde2; border-radius: 4px; padding: 8px 10px; font-family: "Liberation Mono", monospace; font-size: 10pt; white-space: pre-wrap; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 10.5pt; }
+  th, td { border: 1px solid #b8c4cc; padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: #e7eef3; color: #0b3d5c; }
+  .callout { background: #fff8e1; border-left: 5px solid #f0ad4e; padding: 8px 12px; margin: 12px 0; }
+  .verify { background: #eaf7ea; border-left: 5px solid #4caf50; padding: 8px 12px; margin: 12px 0; }
+  .cover-sub { color: #555; font-size: 12pt; }
+  .tag { font-family: "Liberation Sans", Arial, sans-serif; font-size: 9pt; background:#0b3d5c; color:#fff; padding:2px 8px; border-radius: 10px; }
+  a { color: #1a5f8a; }
+  .small { font-size: 9.5pt; color: #555; }
+</style>
+</head>
+<body>
+
+<p><span class="tag">INVESTIGACIÓN 1 de 3 · Serie PIA TSCI 3 · Equipo 3</span></p>
+<h1>Herramientas y entorno de trabajo</h1>
+<p class="cover-sub">Cómo usar el conjunto de herramientas (Python, sus librerías, Jupyter, LibreOffice y Git) para el proyecto <em>«Análisis del Impacto de Hábitos de Vida y Factores Demográficos en los Gastos Médicos»</em>.</p>
+<p class="small">Documento técnico-didáctico. Escrito para que <strong>una persona no experta o una IA colaboradora</strong> entiendan qué hace cada herramienta, por qué se usa y cómo se conecta con el resto. Las afirmaciones técnicas están contrastadas con la documentación oficial (ver Referencias).</p>
+
+<h2>0. Mapa mental: ¿qué herramienta hace qué?</h2>
+<p>Antes de los detalles, la foto completa. Un proyecto de minería de datos es una <strong>cadena de montaje</strong>: cada herramienta resuelve una etapa.</p>
+<table>
+  <tr><th width="26%">Etapa</th><th width="37%">Herramienta</th><th width="37%">Para qué sirve aquí</th></tr>
+  <tr><td>Guardar y compartir código</td><td>Git + GitHub</td><td>Que todo el equipo trabaje sobre la misma base sin pisarse.</td></tr>
+  <tr><td>Entorno reproducible</td><td>Python + venv + <code>requirements.txt</code></td><td>Que el proyecto corra igual en cualquier computadora.</td></tr>
+  <tr><td>Cuaderno de análisis</td><td>Jupyter Notebook</td><td>Escribir código y ver resultados/gráficas paso a paso.</td></tr>
+  <tr><td>Manejo de datos</td><td>pandas + NumPy</td><td>Cargar el CSV, limpiarlo, calcular estadísticas.</td></tr>
+  <tr><td>Visualización</td><td>Matplotlib + seaborn</td><td>Histogramas, dispersión, mapa de calor de correlación.</td></tr>
+  <tr><td>Modelado</td><td>scikit-learn + statsmodels</td><td>Regresión lineal y sus métricas.</td></tr>
+  <tr><td>Documentos finales</td><td>LibreOffice (headless)</td><td>Convertir reportes a PDF / Word / etc.</td></tr>
+</table>
+
+<h2>1. Python y el entorno reproducible</h2>
+<p><strong>Python</strong> es el lenguaje que usaremos. Lo importante no es solo «tener Python», sino tener un <strong>entorno reproducible</strong>: la misma versión de cada librería en todas las máquinas. Eso evita el clásico «en mi compu sí funciona».</p>
+
+<h3>Entorno virtual (venv)</h3>
+<p>Un <em>entorno virtual</em> es una carpeta aislada con su propia copia de Python y librerías, separada del sistema. Así, lo que instala este proyecto no rompe otros.</p>
+<pre>python3 -m venv .venv          # crea el entorno (una sola vez)
+source .venv/bin/activate      # actívalo (macOS/Linux)
+.venv\Scripts\activate         # actívalo (Windows)
+pip install -r requirements.txt  # instala TODAS las librerías del proyecto</pre>
+
+<h3>El archivo <code>requirements.txt</code></h3>
+<p>Es la «lista de ingredientes» con versiones exactas (ej. <code>pandas==3.0.3</code>). El operador <code>==</code> fija la versión para que el análisis sea <strong>reproducible</strong>: cualquiera obtiene los mismos resultados. Este proyecto ya incluye pandas, numpy, matplotlib, seaborn, scikit-learn, statsmodels y las librerías para generar documentos (python-docx, python-pptx, openpyxl).</p>
+<div class="callout"><strong>Buena práctica.</strong> Cuando instales una librería nueva, agrégala a <code>requirements.txt</code> (o corre <code>pip freeze &gt; requirements.txt</code>). Si no, tus compañeros no la tendrán.</div>
+
+<h2>2. Jupyter Notebook: el cuaderno de laboratorio</h2>
+<p>Un <strong>notebook</strong> (<code>.ipynb</code>) mezcla <em>celdas de código</em> y <em>celdas de texto</em>. Ejecutas una celda y ves el resultado justo debajo: tablas, números y gráficas. Es ideal para el Análisis Exploratorio porque documenta el razonamiento paso a paso, tal como pide la rúbrica («pantallazos del código y resultados»).</p>
+<pre>jupyter notebook        # abre la interfaz en el navegador
+# o desde VS Code: abrir el archivo .ipynb directamente</pre>
+<div class="callout"><strong>Cuidado con el orden.</strong> Un notebook recuerda el estado de las variables. Si ejecutas celdas fuera de orden puedes engañarte. Antes de entregar, usa <em>«Restart &amp; Run All»</em> para confirmar que todo corre de arriba a abajo sin errores.</div>
+
+<h2>3. pandas y NumPy: el corazón del manejo de datos</h2>
+<p><strong>NumPy</strong> aporta los arreglos numéricos rápidos; <strong>pandas</strong> se construye encima y ofrece el <code>DataFrame</code>: una tabla con filas y columnas, como una hoja de Excel pero programable.</p>
+
+<h3>Operaciones que usarás sí o sí</h3>
+<table>
+  <tr><th width="30%">Código</th><th width="70%">Qué hace</th></tr>
+  <tr><td><code>pd.read_csv("data/insurance.csv")</code></td><td>Carga el dataset en un DataFrame.</td></tr>
+  <tr><td><code>df.head()</code></td><td>Muestra las primeras filas para inspección.</td></tr>
+  <tr><td><code>df.info()</code></td><td>Tipos de dato y conteo de no-nulos por columna.</td></tr>
+  <tr><td><code>df.describe()</code></td><td>Estadística descriptiva (media, desviación, cuartiles).</td></tr>
+  <tr><td><code>df.isnull().sum()</code></td><td>Cuenta valores faltantes por columna.</td></tr>
+  <tr><td><code>df.duplicated().sum()</code></td><td>Cuenta filas duplicadas.</td></tr>
+  <tr><td><code>df.drop_duplicates()</code></td><td>Elimina duplicados.</td></tr>
+  <tr><td><code>df.groupby("smoker")["charges"].mean()</code></td><td>Gasto medio por grupo (fumador vs no).</td></tr>
+  <tr><td><code>df.corr(numeric_only=True)</code></td><td>Matriz de correlación entre variables numéricas.</td></tr>
+</table>
+<div class="verify"><strong>Dato verificado.</strong> En este dataset (1 338 filas), pandas detecta exactamente <strong>1 fila duplicada</strong> y <strong>0 nulos</strong>; tras <code>drop_duplicates()</code> quedan <strong>1 337</strong> registros. (Comprobado ejecutando el propio dataset del repositorio.)</div>
+
+<h2>4. Matplotlib y seaborn: visualización</h2>
+<p><strong>Matplotlib</strong> es la librería base de gráficas; <strong>seaborn</strong> se apoya en ella y produce gráficos estadísticos bonitos con poco código. Para este proyecto, las gráficas clave son:</p>
+<table>
+  <tr><th width="26%">Gráfica</th><th width="37%">Función</th><th width="37%">Qué revela</th></tr>
+  <tr><td>Histograma</td><td><code>sns.histplot(df["charges"])</code></td><td>La distribución de gastos (aquí, muy sesgada a la derecha).</td></tr>
+  <tr><td>Dispersión</td><td><code>sns.scatterplot(x="bmi", y="charges", hue="smoker", data=df)</code></td><td>Relación IMC–gasto, separando fumadores por color (interacción clave).</td></tr>
+  <tr><td>Caja (boxplot)</td><td><code>sns.boxplot(x="smoker", y="charges", data=df)</code></td><td>Compara la mediana y los atípicos entre grupos.</td></tr>
+  <tr><td>Mapa de calor</td><td><code>sns.heatmap(df.corr(numeric_only=True), annot=True)</code></td><td>Matriz de correlación visual (ya está en el notebook base).</td></tr>
+</table>
+<div class="callout"><strong>Consejo didáctico.</strong> Una gráfica sin título ni ejes etiquetados no comunica. Añade siempre <code>plt.title(...)</code>, <code>plt.xlabel(...)</code>, <code>plt.ylabel(...)</code>. Para guardar: <code>plt.savefig("reports/figures/nombre.png", dpi=150, bbox_inches="tight")</code>.</div>
+
+<h2>5. scikit-learn y statsmodels: el modelado</h2>
+<p>Ambas hacen regresión, pero con enfoques complementarios:</p>
+<table>
+  <tr><th width="26%"></th><th width="37%">scikit-learn</th><th width="37%">statsmodels</th></tr>
+  <tr><td>Enfoque</td><td>Machine learning / predicción</td><td>Estadística inferencial</td></tr>
+  <tr><td>Fortaleza</td><td>Entrenar, predecir, métricas, validación cruzada</td><td>Tabla con p-valores, intervalos de confianza, R² ajustado</td></tr>
+  <tr><td>Úsala para…</td><td>Medir qué tan bien predice el modelo</td><td>Interpretar si cada variable es estadísticamente significativa</td></tr>
+</table>
+<pre># scikit-learn: entrenar y evaluar
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score, mean_squared_error
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+modelo = LinearRegression().fit(X_train, y_train)
+pred = modelo.predict(X_test)
+print(r2_score(y_test, pred))
+
+# statsmodels: interpretar (p-valores, significancia)
+import statsmodels.api as sm
+modelo_sm = sm.OLS(y, sm.add_constant(X)).fit()
+print(modelo_sm.summary())</pre>
+<p class="small">Las fórmulas y la interpretación de estas técnicas se explican a fondo en la <strong>Investigación 2</strong> de esta serie.</p>
+
+<h2>6. LibreOffice (modo headless): generar documentos</h2>
+<p>LibreOffice puede ejecutarse <strong>sin abrir ventana</strong> («headless») para convertir archivos entre formatos. El repositorio ya trae scripts que lo automatizan y guardan la salida en <code>docs/generated_docs/</code>.</p>
+<pre>bash scripts/setup_libreoffice.sh                  # instalar (una vez)
+python scripts/generate_document.py reporte.html pdf   # convertir a PDF</pre>
+<div class="verify"><strong>Regla verificada empíricamente.</strong> LibreOffice convierte <em>cualquier</em> formato a <strong>PDF</strong> de forma fiable. En cambio, <strong>no</strong> existe filtro para pasar HTML directo a <code>.docx</code>. Por eso: para crear Word/PowerPoint/Excel se generan con Python (python-docx, python-pptx, openpyxl) y LibreOffice se usa para llevarlos a PDF. La guía completa está en <code>scripts/README.md</code>.</div>
+
+<h2>7. Git y GitHub: trabajo colaborativo</h2>
+<p><strong>Git</strong> lleva el historial de cambios; <strong>GitHub</strong> lo aloja en la nube. Flujo mínimo para el equipo:</p>
+<pre>git checkout -b mi-analisis     # crear una rama propia
+# ...editar archivos...
+git add .                       # marcar cambios
+git commit -m "Agrega análisis de regresión"
+git push origin mi-analisis     # subir a GitHub
+# luego abrir un Pull Request para integrar a main</pre>
+<div class="callout"><strong>Regla de oro.</strong> No trabajen todos directo sobre <code>main</code>. Cada quien en su rama y se integra con Pull Request; así se revisa y no se pierde trabajo.</div>
+
+<h2>8. Errores comunes (y cómo evitarlos)</h2>
+<table>
+  <tr><th width="26%">Síntoma</th><th width="37%">Causa probable</th><th width="37%">Solución</th></tr>
+  <tr><td><code>ModuleNotFoundError</code></td><td>Librería no instalada / entorno sin activar</td><td><code>source .venv/bin/activate</code> y <code>pip install -r requirements.txt</code></td></tr>
+  <tr><td>Ruta del CSV no encontrada</td><td>Rutas relativas dependen de dónde corres</td><td>Correr desde la raíz del repo, o usar rutas claras (<code>../data/insurance.csv</code> desde el notebook)</td></tr>
+  <tr><td>Resultados que «cambian solos»</td><td>Celdas ejecutadas fuera de orden</td><td>«Restart &amp; Run All» antes de concluir</td></tr>
+  <tr><td>Gráfica ilegible</td><td>Sin títulos ni etiquetas</td><td>Añadir <code>title</code>, <code>xlabel</code>, <code>ylabel</code></td></tr>
+</table>
+
+<h2>9. Cómo lo haría una IA (resumen operativo)</h2>
+<ol>
+  <li>Activar el entorno e instalar dependencias (<code>pip install -r requirements.txt</code>).</li>
+  <li>Cargar el CSV con pandas y verificar tipos, nulos y duplicados.</li>
+  <li>Explorar con seaborn/matplotlib (distribuciones, correlación).</li>
+  <li>Modelar con scikit-learn (predicción) y confirmar significancia con statsmodels.</li>
+  <li>Redactar el reporte en HTML y convertirlo a PDF con <code>scripts/generate_document.py</code>.</li>
+</ol>
+
+<h2>Referencias</h2>
+<p class="small">
+1. McKinney, W. <em>pandas — Documentación oficial</em>. <a href="https://pandas.pydata.org/docs/">pandas.pydata.org/docs</a><br>
+2. Harris, C. R. et al. (2020). «Array programming with NumPy». <em>Nature</em> 585, 357–362. <a href="https://numpy.org/doc/">numpy.org/doc</a><br>
+3. Hunter, J. D. (2007). «Matplotlib: A 2D Graphics Environment». <em>Computing in Science &amp; Engineering</em>. <a href="https://matplotlib.org/stable/">matplotlib.org</a><br>
+4. Waskom, M. (2021). «seaborn: statistical data visualization». <em>JOSS</em>. <a href="https://seaborn.pydata.org/">seaborn.pydata.org</a><br>
+5. Pedregosa, F. et al. (2011). «Scikit-learn: Machine Learning in Python». <em>JMLR</em> 12, 2825–2830. <a href="https://scikit-learn.org/stable/">scikit-learn.org</a><br>
+6. Seabold, S. &amp; Perktold, J. (2010). «statsmodels». <a href="https://www.statsmodels.org/stable/">statsmodels.org</a><br>
+7. Project Jupyter. <a href="https://docs.jupyter.org/">docs.jupyter.org</a> · The Document Foundation. <em>LibreOffice</em>. <a href="https://www.libreoffice.org/">libreoffice.org</a><br>
+8. VanderPlas, J. (2016). <em>Python Data Science Handbook</em>. O'Reilly. <a href="https://jakevdp.github.io/PythonDataScienceHandbook/">edición en línea gratuita</a>
+</p>
+
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Fase Día 4 — Regresión Lineal Múltiple</title>
+<style>
+  @page { margin: 2cm; }
+  body { font-family: "Liberation Serif", Georgia, serif; font-size: 12pt; line-height: 1.5; color: #1a1a1a; margin: 0; }
+  h1 { font-family: "Liberation Sans", Arial, sans-serif; font-size: 21pt; color: #0b3d5c; border-bottom: 3px solid #0b3d5c; padding-bottom: 6px; }
+  h2 { font-family: "Liberation Sans", Arial, sans-serif; font-size: 15pt; color: #0b3d5c; margin-top: 20px; border-left: 5px solid #2a80b9; padding-left: 8px; }
+  h3 { font-family: "Liberation Sans", Arial, sans-serif; font-size: 12.5pt; color: #23566e; margin-bottom: 4px; }
+  code, .mono { font-family: "Liberation Mono", "Courier New", monospace; font-size: 10.5pt; }
+  pre { background: #f4f6f8; border: 1px solid #d6dde2; border-radius: 4px; padding: 8px 10px; font-family: "Liberation Mono", monospace; font-size: 9.5pt; white-space: pre-wrap; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 10.5pt; }
+  th, td { border: 1px solid #b8c4cc; padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: #e7eef3; color: #0b3d5c; }
+  .formula { background: #f0f5fa; border: 1px solid #cfe0ee; border-radius: 5px; padding: 10px 14px; margin: 12px 0; text-align: center; font-size: 12pt; }
+  .formula .name { display:block; font-size: 9.5pt; color:#0b3d5c; font-family:"Liberation Sans",Arial,sans-serif; margin-bottom:6px; letter-spacing:.5px; }
+  .callout { background: #fff8e1; border-left: 5px solid #f0ad4e; padding: 8px 12px; margin: 12px 0; }
+  .verify { background: #eaf7ea; border-left: 5px solid #4caf50; padding: 8px 12px; margin: 12px 0; }
+  .warn { background: #fdecea; border-left: 5px solid #e15241; padding: 8px 12px; margin: 12px 0; }
+  .dep { background: #eef2fb; border-left: 5px solid #3f51b5; padding: 8px 12px; margin: 12px 0; }
+  .cover-sub { color: #555; font-size: 12pt; }
+  .tag { font-family: "Liberation Sans", Arial, sans-serif; font-size: 9pt; background:#0b3d5c; color:#fff; padding:2px 8px; border-radius: 10px; }
+  a { color: #1a5f8a; } .small { font-size: 9.5pt; color: #555; }
+  .var { font-style: italic; }
+</style>
+</head>
+<body>
+
+<p><span class="tag">FASE · DÍA 4 · Serie de fases PIA TSCI 3 · Equipo 3</span></p>
+<h1>Regresión Lineal Múltiple <span style="font-size:12pt; color:#e15241;">(técnica principal)</span></h1>
+<p class="cover-sub">Entregable: <code>03_regresion.ipynb</code> · Responsables: Patricio, Gerardo · Punto de partida: <code>df_numerico</code> ya codificado.</p>
+<p class="small">Esta es la técnica que más peso tiene en la rúbrica (Análisis = 30%). Investigación de apoyo con fórmulas y código explicados. Referencias APA al final.</p>
+
+<h2>1. Objetivo de la fase</h2>
+<p>La <strong>regresión lineal múltiple</strong> construye una ecuación que estima el gasto médico (<code>charges</code>) a partir de varias variables a la vez, y —lo más importante para el proyecto— <strong>cuantifica cuánto pesa cada factor en dólares</strong>. Responde: «manteniendo lo demás igual, ¿cuánto sube el gasto por ser fumador, por cada año de edad, por cada punto de IMC?».</p>
+
+<div class="dep"><strong>🔌 Cableado / dependencias.</strong>
+<ul>
+  <li><strong>Recibe de Días 1–3:</strong> el <code>df_numerico</code> completo y codificado, con las columnas <code>age, sex, bmi, children, smoker, region_northwest, region_southeast, region_southwest</code>. Estas 3 columnas de región vienen de <code>get_dummies(drop_first=True)</code> (la región omitida, <em>northeast</em>, es la categoría de referencia).</li>
+  <li><strong>Recibe de Día 2 (EDA):</strong> el aviso de que <code>charges</code> está sesgada → considera reportar también un modelo con <code>log(charges)</code> como mejora.</li>
+  <li><strong>Recibe de Día 3 (correlación):</strong> qué variables se asocian más con <code>charges</code> (esperado: <code>smoker</code> domina).</li>
+  <li><strong>Entrega a Días 6 y 7:</strong> R², coeficientes y p-values, además de los <em>pantallazos</em> del resumen del modelo (el profesor los pide explícitamente).</li>
+</ul>
+</div>
+
+<h2>2. El modelo y cómo se ajusta</h2>
+<div class="formula"><span class="name">MODELO DE REGRESIÓN LINEAL MÚLTIPLE</span><br>
+ŷ = β₀ + β₁·age + β₂·sex + β₃·bmi + β₄·children + β₅·smoker + … + ε
+</div>
+<p><span class="var">ŷ</span> es el gasto <em>predicho</em>; <span class="var">β₀</span> el intercepto; cada <span class="var">βⱼ</span> dice cuánto cambia el gasto por una unidad de esa variable, con las demás constantes; <span class="var">ε</span> es el error (lo que el modelo no explica). Los coeficientes se eligen por <strong>mínimos cuadrados ordinarios (OLS)</strong>: minimizan la suma de los errores al cuadrado.</p>
+<div class="formula"><span class="name">CRITERIO OLS · SOLUCIÓN MATRICIAL</span><br>
+min Σ (yᵢ − ŷᵢ)² &nbsp;&nbsp;⟶&nbsp;&nbsp; β = ( Xᵀ X )⁻¹ Xᵀ y
+</div>
+<p>La fórmula matricial da los coeficientes de golpe: <span class="var">X</span> es la tabla de datos (con una columna de unos para el intercepto), <span class="var">y</span> el vector de gastos. No necesitas calcularla a mano: <code>statsmodels</code> lo hace.</p>
+
+<h2>3. Código explicado (statsmodels, recomendado)</h2>
+<p>Se recomienda <code>statsmodels</code> porque su <code>summary()</code> entrega <strong>R², coeficientes y p-values</strong> juntos — justo lo que pide el profesor.</p>
+<pre>import statsmodels.api as sm
+
+# 1) Separar variables independientes (X) y dependiente (y)
+X = df_numerico.drop(columns="charges")     # age, sex, bmi, children, smoker, region_*
+y = df_numerico["charges"]
+
+# 2) Agregar la columna de intercepto (la constante β0)
+X = sm.add_constant(X)
+
+# 3) Ajustar el modelo OLS y ver el resumen
+modelo = sm.OLS(y, X).fit()
+print(modelo.summary())</pre>
+<p><strong>Línea por línea:</strong> <code>drop(columns="charges")</code> deja solo las X; <code>add_constant</code> agrega el término β₀ (sin él, la recta pasaría forzada por el origen); <code>OLS(y, X).fit()</code> resuelve los mínimos cuadrados; <code>summary()</code> imprime la tabla que hay que interpretar y capturar en pantalla.</p>
+<div class="callout"><strong>Alternativa scikit-learn</strong> (para predecir y medir error en datos nuevos): <code>LinearRegression().fit(X_train, y_train)</code> + <code>r2_score</code>, <code>mean_squared_error</code>. Lo ideal es <strong>usar ambas</strong>: statsmodels para interpretar, sklearn con <code>train_test_split</code> para evaluar honestamente en datos no vistos.</div>
+
+<h2>4. Cómo leer el resumen del modelo (lo que hay que capturar)</h2>
+<h3>4.1 R² — ¿qué tan bueno es el modelo?</h3>
+<div class="formula"><span class="name">COEFICIENTE DE DETERMINACIÓN</span><br>
+R² = 1 − [ Σ (yᵢ − ŷᵢ)² ] / [ Σ (yᵢ − ȳ)² ]
+</div>
+<p>Proporción de la variación del gasto que el modelo explica (0 a 1). Usa el <strong>R² ajustado</strong> para comparar modelos, porque penaliza variables inútiles.</p>
+<div class="verify"><strong>Resultado esperado (verificado con literatura):</strong> este modelo alcanza <strong>R² ≈ 0.75–0.76</strong> — explica ~¾ de la variabilidad del gasto (Lantz, 2019; estudios replicados sobre el mismo dataset).</div>
+
+<h3>4.2 Coeficientes — ¿cuánto pesa cada variable?</h3>
+<p>Cada coeficiente está en <strong>dólares</strong>. Ejemplo de lectura: si el coeficiente de <code>age</code> es ~256, cada año adicional se asocia con ~$256 más de gasto, con lo demás constante.</p>
+<div class="verify"><strong>Coeficiente estrella (verificado):</strong> el de <code>smoker</code> ronda <strong>+$23 800</strong> (estudios reales reportan 23 848 y 23 811). Es decir: a igualdad de edad, IMC, etc., ser fumador se asocia con ~$23 800 más de gasto anual. Es, con enorme diferencia, el mayor efecto.</div>
+
+<h3>4.3 P-values — ¿qué variables son significativas?</h3>
+<p>El <strong>p-value</strong> es la probabilidad de ver este efecto por puro azar si la variable en realidad no influyera. Regla estándar: <strong>p &lt; 0.05</strong> ⟶ la variable es <em>estadísticamente significativa</em>. Ojo: significativo no es lo mismo que «grande»; solo dice que el efecto probablemente no es casualidad.</p>
+<div class="verify"><strong>Esperado:</strong> <code>age</code>, <code>bmi</code> y <code>smoker</code> salen muy significativas (p muy pequeña); <code>sex</code> y algunas <code>region_*</code> suelen no ser significativas (p &gt; 0.05).</div>
+<div class="warn"><strong>Malinterpretación común.</strong> Un p-value alto (&gt;0.05) NO prueba que la variable «no sirve»; solo que <em>en estos datos</em> no hay evidencia suficiente de su efecto. No lo redactes como «no influye», sino como «no resultó estadísticamente significativa».</div>
+
+<h2>5. Supuestos y una mejora recomendada</h2>
+<p>OLS es óptimo (BLUE) si se cumplen los supuestos de Gauss-Markov: linealidad, independencia, no multicolinealidad perfecta, exogeneidad y <strong>homocedasticidad</strong> (varianza del error constante).</p>
+<div class="callout"><strong>Mejora que suma puntos:</strong> por el sesgo de <code>charges</code>, es casi seguro que se viole la homocedasticidad. Ajusta un segundo modelo con <code>y = np.log(df_numerico["charges"])</code> y compara el R². La transformación log estabiliza la varianza y suele mejorar el ajuste (Feng et al., 2014). Interpretar coeficientes en escala log cambia (pasan a ser ~% de cambio), así que explícalo.</div>
+
+<h2>6. Checklist del entregable (<code>03_regresion.ipynb</code>)</h2>
+<ul>
+  <li>☐ Separación clara de X (8 columnas) e y (<code>charges</code>).</li>
+  <li>☐ Modelo OLS ajustado con statsmodels (o sklearn) + <code>add_constant</code>.</li>
+  <li>☐ Reporte y explicación de R² (y R² ajustado).</li>
+  <li>☐ Tabla de coeficientes interpretada en dólares.</li>
+  <li>☐ P-values: qué variables son significativas (p&lt;0.05) y cuáles no.</li>
+  <li>☐ <strong>Pantallazos</strong> del código y del resumen del modelo.</li>
+  <li>☐ Conclusión: qué tan bueno es el modelo y qué variables predicen mejor.</li>
+  <li>☐ (Recomendado) modelo alterno con <code>log(charges)</code>.</li>
+</ul>
+
+<h2>Referencias (APA 7)</h2>
+<p class="small">
+Feng, C., Wang, H., Lu, N., Chen, T., He, H., Lu, Y., &amp; Tu, X. M. (2014). Log-transformation and its implications for data analysis. <em>Shanghai Archives of Psychiatry, 26</em>(2), 105–109. https://doi.org/10.3969/j.issn.1002-0829.2014.02.009<br><br>
+James, G., Witten, D., Hastie, T., &amp; Tibshirani, R. (2021). <em>An introduction to statistical learning: With applications in R</em> (2nd ed.). Springer. https://doi.org/10.1007/978-1-0716-1418-1<br><br>
+Lantz, B. (2019). <em>Machine learning with R</em> (3rd ed.). Packt Publishing.<br><br>
+Montgomery, D. C., Peck, E. A., &amp; Vining, G. G. (2021). <em>Introduction to linear regression analysis</em> (6th ed.). Wiley.<br><br>
+Seabold, S., &amp; Perktold, J. (2010). Statsmodels: Econometric and statistical modeling with Python. <em>Proceedings of the 9th Python in Science Conference</em>, 92–96. https://doi.org/10.25080/Majora-92bf1922-011
+</p>
+
+</body>
+</html>

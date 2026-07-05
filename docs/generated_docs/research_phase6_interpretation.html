@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Fase Día 6 — Interpretación y Conclusiones</title>
+<style>
+  @page { margin: 2cm; }
+  body { font-family: "Liberation Serif", Georgia, serif; font-size: 12pt; line-height: 1.5; color: #1a1a1a; margin: 0; }
+  h1 { font-family: "Liberation Sans", Arial, sans-serif; font-size: 21pt; color: #0b3d5c; border-bottom: 3px solid #0b3d5c; padding-bottom: 6px; }
+  h2 { font-family: "Liberation Sans", Arial, sans-serif; font-size: 15pt; color: #0b3d5c; margin-top: 20px; border-left: 5px solid #2a80b9; padding-left: 8px; }
+  h3 { font-family: "Liberation Sans", Arial, sans-serif; font-size: 12.5pt; color: #23566e; margin-bottom: 4px; }
+  code, .mono { font-family: "Liberation Mono", "Courier New", monospace; font-size: 10.5pt; }
+  pre { background: #f4f6f8; border: 1px solid #d6dde2; border-radius: 4px; padding: 8px 10px; font-family: "Liberation Mono", monospace; font-size: 9.5pt; white-space: pre-wrap; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 10.5pt; }
+  th, td { border: 1px solid #b8c4cc; padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: #e7eef3; color: #0b3d5c; }
+  .callout { background: #fff8e1; border-left: 5px solid #f0ad4e; padding: 8px 12px; margin: 12px 0; }
+  .verify { background: #eaf7ea; border-left: 5px solid #4caf50; padding: 8px 12px; margin: 12px 0; }
+  .warn { background: #fdecea; border-left: 5px solid #e15241; padding: 8px 12px; margin: 12px 0; }
+  .dep { background: #eef2fb; border-left: 5px solid #3f51b5; padding: 8px 12px; margin: 12px 0; }
+  .cover-sub { color: #555; font-size: 12pt; }
+  .tag { font-family: "Liberation Sans", Arial, sans-serif; font-size: 9pt; background:#0b3d5c; color:#fff; padding:2px 8px; border-radius: 10px; }
+  a { color: #1a5f8a; } .small { font-size: 9.5pt; color: #555; }
+</style>
+</head>
+<body>
+
+<p><span class="tag">FASE · DÍA 6 · Serie de fases PIA TSCI 3 · Equipo 3</span></p>
+<h1>Interpretación y Conclusiones Consolidadas</h1>
+<p class="cover-sub">Entregable: texto base de interpretación, limitaciones y recomendaciones · Responsables: Todo el equipo.</p>
+<p class="small">Investigación de apoyo para convertir cuatro notebooks en un mensaje claro y honesto. Referencias APA al final.</p>
+
+<h2>1. Objetivo de la fase</h2>
+<p>En CRISP-DM esta es la <strong>Evaluación</strong>: dejar de producir resultados y empezar a <em>darles sentido</em> en el contexto del problema. Se consolidan los hallazgos de los Días 2–5 en una narrativa única, se declaran las limitaciones y se redactan conclusiones y recomendaciones. Este texto es la <strong>materia prima</strong> del documento y la presentación del Día 7.</p>
+
+<div class="dep"><strong>🔌 Cableado / dependencias.</strong>
+<ul>
+  <li><strong>Recibe de Día 2 (EDA):</strong> distribuciones, sesgo de <code>charges</code>, decisión sobre outliers.</li>
+  <li><strong>Recibe de Día 3 (correlación):</strong> ranking de asociación (fumar domina).</li>
+  <li><strong>Recibe de Día 4 (regresión):</strong> R² ≈ 0.75 y coeficientes en dólares (fumar ≈ +$23 800).</li>
+  <li><strong>Recibe de Día 5 (clustering):</strong> perfiles de riesgo.</li>
+  <li><strong>Entrega a Día 7:</strong> conclusiones, limitaciones y recomendaciones ya redactadas.</li>
+</ul>
+</div>
+
+<h2>2. Cómo consolidar: la estructura Hallazgo → Evidencia → Significado</h2>
+<p>Para cada conclusión, encadena tres piezas (evita el error de solo listar números):</p>
+<table>
+  <tr><th width="22%">Pieza</th><th width="78%">Ejemplo integrado</th></tr>
+  <tr><td><strong>Hallazgo</strong></td><td>Fumar es el factor más asociado con el gasto médico.</td></tr>
+  <tr><td><strong>Evidencia</strong> (de varios notebooks)</td><td>Correlación +0.79 (Día 3); coeficiente +$23 800 con p&lt;0.05 (Día 4); el cluster de alto costo coincide con fumadores (Día 5).</td></tr>
+  <tr><td><strong>Significado</strong></td><td>Un asegurado fumador implica un riesgo de costo mucho mayor; concuerda con la evidencia médica (Xu et al., 2015).</td></tr>
+</table>
+<div class="verify"><strong>La fuerza de la triangulación.</strong> Que <em>tres técnicas distintas</em> (correlación, regresión y clustering) apunten al mismo factor hace la conclusión mucho más robusta que un solo número. Resáltalo.</div>
+
+<h2>3. Conclusiones esperadas (borrador base)</h2>
+<ul>
+  <li><strong>Tabaquismo:</strong> factor dominante del gasto (asociación fuerte y significativa; ~+$23 800).</li>
+  <li><strong>Edad e IMC:</strong> factores secundarios pero significativos; el IMC pesa sobre todo <em>combinado con fumar</em> (interacción vista en el EDA).</li>
+  <li><strong>Sexo y región:</strong> influencia débil o no significativa.</li>
+  <li><strong>Perfiles de riesgo:</strong> el clustering separa al menos un grupo de «alto costo» claramente diferenciado.</li>
+</ul>
+
+<h2>4. Limitaciones (declararlas SUMA puntos)</h2>
+<p>Un buen análisis reconoce sus límites (esto pesa en el criterio de Interpretación, 20%):</p>
+<div class="warn">
+<ul>
+  <li><strong>Datos simulados:</strong> <code>insurance.csv</code> fue generado por Brett Lantz sobre demografía del Census de EE.UU. (Lantz, 2019); no son pacientes reales. Las técnicas y tendencias son válidas y didácticas, pero las cifras no son clínicas.</li>
+  <li><strong>Ámbito geográfico:</strong> solo EE.UU.; no generaliza directo a México u otros países.</li>
+  <li><strong>Variables ausentes:</strong> no hay historial médico, enfermedades previas, ingreso, actividad física… que también afectan el gasto.</li>
+  <li><strong>Correlación ≠ causalidad:</strong> el estudio es observacional; identifica asociaciones, no causas probadas.</li>
+  <li><strong>Supuestos del modelo:</strong> el sesgo de <code>charges</code> puede violar la homocedasticidad (mitigable con <code>log(charges)</code>).</li>
+</ul>
+</div>
+
+<h2>5. Recomendaciones (basadas en los hallazgos)</h2>
+<p>Deben derivarse de los datos y ser accionables para la aseguradora:</p>
+<ul>
+  <li><strong>Primas ajustadas por riesgo</strong> según condición de fumador (el factor de mayor impacto).</li>
+  <li><strong>Programas de cesación de tabaco</strong> y de control de IMC como estrategia para reducir costos a largo plazo (respaldado por evidencia de costos del tabaquismo y la obesidad; Xu et al., 2015; Cawley &amp; Meyerhoefer, 2012).</li>
+  <li><strong>Segmentación por perfiles</strong> del clustering para diseñar productos diferenciados.</li>
+  <li><strong>Recolectar más variables</strong> (historial médico) en futuros análisis para mejorar la predicción.</li>
+</ul>
+
+<h2>6. Dinámica de la reunión (Día 6)</h2>
+<ol>
+  <li>Cada dupla/trío presenta sus hallazgos (~5 min).</li>
+  <li>Se llena la tabla Hallazgo→Evidencia→Significado en conjunto.</li>
+  <li>Se acuerdan limitaciones y recomendaciones.</li>
+  <li>Se deja todo por escrito como base para el Día 7.</li>
+</ol>
+
+<h2>7. Checklist del entregable</h2>
+<ul>
+  <li>☐ Conclusiones que integran los 4 notebooks (no listas sueltas).</li>
+  <li>☐ Limitaciones explícitas (mínimo las 5 de arriba).</li>
+  <li>☐ Recomendaciones accionables ligadas a los hallazgos.</li>
+  <li>☐ Documento base listo para el equipo del PDF y de la presentación.</li>
+</ul>
+
+<h2>Referencias (APA 7)</h2>
+<p class="small">
+Cawley, J., &amp; Meyerhoefer, C. (2012). The medical care costs of obesity: An instrumental variables approach. <em>Journal of Health Economics, 31</em>(1), 219–230. https://doi.org/10.1016/j.jhealeco.2011.10.003<br><br>
+Chapman, P., Clinton, J., Kerber, R., Khabaza, T., Reinartz, T., Shearer, C., &amp; Wirth, R. (2000). <em>CRISP-DM 1.0: Step-by-step data mining guide</em>. SPSS Inc.<br><br>
+Lantz, B. (2019). <em>Machine learning with R</em> (3rd ed.). Packt Publishing.<br><br>
+Xu, X., Bishop, E. E., Kennedy, S. M., Simpson, S. A., &amp; Pechacek, T. F. (2015). Annual healthcare spending attributable to cigarette smoking: An update. <em>American Journal of Preventive Medicine, 48</em>(3), 326–333. https://doi.org/10.1016/j.amepre.2014.10.012
+</p>
+
+</body>
+</html>

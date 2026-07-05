@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Fase Día 3 — Análisis de Correlación</title>
+<style>
+  @page { margin: 2cm; }
+  body { font-family: "Liberation Serif", Georgia, serif; font-size: 12pt; line-height: 1.5; color: #1a1a1a; margin: 0; }
+  h1 { font-family: "Liberation Sans", Arial, sans-serif; font-size: 21pt; color: #0b3d5c; border-bottom: 3px solid #0b3d5c; padding-bottom: 6px; }
+  h2 { font-family: "Liberation Sans", Arial, sans-serif; font-size: 15pt; color: #0b3d5c; margin-top: 20px; border-left: 5px solid #2a80b9; padding-left: 8px; }
+  h3 { font-family: "Liberation Sans", Arial, sans-serif; font-size: 12.5pt; color: #23566e; margin-bottom: 4px; }
+  code, .mono { font-family: "Liberation Mono", "Courier New", monospace; font-size: 10.5pt; }
+  pre { background: #f4f6f8; border: 1px solid #d6dde2; border-radius: 4px; padding: 8px 10px; font-family: "Liberation Mono", monospace; font-size: 9.5pt; white-space: pre-wrap; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 10.5pt; }
+  th, td { border: 1px solid #b8c4cc; padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: #e7eef3; color: #0b3d5c; }
+  .formula { background: #f0f5fa; border: 1px solid #cfe0ee; border-radius: 5px; padding: 10px 14px; margin: 12px 0; text-align: center; font-size: 12pt; }
+  .formula .name { display:block; font-size: 9.5pt; color:#0b3d5c; font-family:"Liberation Sans",Arial,sans-serif; margin-bottom:6px; letter-spacing:.5px; }
+  .callout { background: #fff8e1; border-left: 5px solid #f0ad4e; padding: 8px 12px; margin: 12px 0; }
+  .verify { background: #eaf7ea; border-left: 5px solid #4caf50; padding: 8px 12px; margin: 12px 0; }
+  .warn { background: #fdecea; border-left: 5px solid #e15241; padding: 8px 12px; margin: 12px 0; }
+  .dep { background: #eef2fb; border-left: 5px solid #3f51b5; padding: 8px 12px; margin: 12px 0; }
+  .cover-sub { color: #555; font-size: 12pt; }
+  .tag { font-family: "Liberation Sans", Arial, sans-serif; font-size: 9pt; background:#0b3d5c; color:#fff; padding:2px 8px; border-radius: 10px; }
+  a { color: #1a5f8a; } .small { font-size: 9.5pt; color: #555; }
+  .var { font-style: italic; }
+</style>
+</head>
+<body>
+
+<p><span class="tag">FASE · DÍA 3 · Serie de fases PIA TSCI 3 · Equipo 3</span></p>
+<h1>Análisis de Correlación</h1>
+<p class="cover-sub">Entregable: <code>02_correlacion.ipynb</code> · Responsables: Guillermo, Emiliano · Punto de partida: sección de correlación de <code>00_setup.ipynb</code>.</p>
+<p class="small">Investigación de apoyo para ejecutar esta fase, con fórmulas y código explicados para persona e IA. Referencias científicas en APA al final.</p>
+
+<h2>1. Objetivo de la fase</h2>
+<p>La <strong>correlación</strong> mide qué tan asociadas están dos variables numéricas, con un número entre <strong>−1 y +1</strong>. El objetivo es identificar <em>qué factores se relacionan más con los cargos médicos</em> (<code>charges</code>) y comunicarlo en palabras, no solo mostrar números.</p>
+
+<div class="dep"><strong>🔌 Cableado / dependencias.</strong>
+<ul>
+  <li><strong>Recibe de Día 1 (setup):</strong> el <code>DataFrame</code> <code>df_numerico</code> ya codificado (variables de texto convertidas a número) y el <em>heatmap</em> preliminar. Si no existe, se reconstruye con el bloque de código del setup (mapeo de <code>sex</code>/<code>smoker</code> y <code>get_dummies</code> de <code>region</code>).</li>
+  <li><strong>Recibe de Día 2 (EDA):</strong> la decisión sobre outliers y el hecho de que <code>charges</code> está sesgada (esto justifica reportar también Spearman, no solo Pearson).</li>
+  <li><strong>Entrega a Día 4 (regresión):</strong> la lista de variables más asociadas con <code>charges</code>. La correlación <em>sugiere</em> qué variables incluir; la regresión las <em>cuantifica</em>. También avisa de <strong>multicolinealidad</strong> (variables X muy correlacionadas entre sí), que puede afectar la regresión.</li>
+  <li><strong>Entrega a Días 6 y 7:</strong> el hallazgo principal (fumar domina) y el heatmap, que irá en el documento y la presentación.</li>
+</ul>
+</div>
+
+<h2>2. Por qué hay que codificar antes de correlacionar</h2>
+<p>La correlación necesita <strong>números</strong>. Por eso el setup transformó las categorías: <code>sex</code> y <code>smoker</code> a 0/1, y <code>region</code> con <em>one-hot</em> (<code>get_dummies(..., drop_first=True)</code>). Se usa <code>drop_first=True</code> para evitar la «trampa de las variables dummy» (colinealidad perfecta al dejar todas las categorías + intercepto).</p>
+
+<h2>3. Coeficiente de Pearson (relación lineal)</h2>
+<div class="formula"><span class="name">COEFICIENTE DE CORRELACIÓN DE PEARSON (r)</span><br>
+r = [ Σ (xᵢ − x̄)(yᵢ − ȳ) ] / √[ Σ(xᵢ − x̄)² · Σ(yᵢ − ȳ)² ]
+</div>
+<p><strong>En español:</strong> el numerador (covarianza) mide si x e y suben juntas; el denominador normaliza por la dispersión de cada una para que el resultado quede entre −1 y +1. Pearson mide relación <strong>lineal</strong>, supone datos ~normales y es <strong>sensible a outliers</strong> (Schober et al., 2018).</p>
+<h3>Escala de interpretación (guía práctica)</h3>
+<table>
+  <tr><th width="34%">|r| aproximado</th><th width="66%">Fuerza de la asociación</th></tr>
+  <tr><td>0.00 – 0.10</td><td>Despreciable</td></tr>
+  <tr><td>0.10 – 0.39</td><td>Débil</td></tr>
+  <tr><td>0.40 – 0.69</td><td>Moderada</td></tr>
+  <tr><td>0.70 – 0.89</td><td>Fuerte</td></tr>
+  <tr><td>0.90 – 1.00</td><td>Muy fuerte</td></tr>
+</table>
+<p class="small">Escala orientativa basada en Schober et al. (2018). No es una ley rígida: el contexto manda.</p>
+
+<h2>4. Coeficiente de Spearman (relación monótona)</h2>
+<p>Como <code>charges</code> está sesgada y tiene outliers, conviene reportar también <strong>Spearman</strong>, que trabaja con los <em>rangos</em> (posiciones ordenadas) y es más robusto.</p>
+<div class="formula"><span class="name">COEFICIENTE DE SPEARMAN (ρ), sin empates</span><br>
+ρ = 1 − [ 6 · Σ dᵢ² ] / [ n · (n² − 1) ]
+</div>
+<p>Donde <span class="var">dᵢ</span> es la diferencia de rangos de cada observación. Si Pearson y Spearman difieren mucho, es señal de relación <strong>no lineal</strong> (justo el caso de IMC entre fumadores).</p>
+
+<h2>5. Código: matriz y mapa de calor</h2>
+<pre>import seaborn as sns, matplotlib.pyplot as plt
+
+corr_pearson  = df_numerico.corr(method="pearson")
+corr_spearman = df_numerico.corr(method="spearman")
+
+plt.figure(figsize=(10, 8))
+sns.heatmap(corr_pearson, annot=True, cmap="coolwarm", fmt=".2f", vmin=-1, vmax=1)
+plt.title("Matriz de correlación de Pearson")
+plt.savefig("../reports/figures/heatmap_pearson.png", dpi=150, bbox_inches="tight"); plt.show()
+
+print(corr_pearson["charges"].sort_values(ascending=False))   # ranking vs charges</pre>
+<h3>Cómo leer el mapa de calor (heatmap)</h3>
+<p>Cada celda es la correlación entre dos variables. El <strong>color</strong> codifica el valor: rojo intenso ≈ +1 (suben juntas), azul intenso ≈ −1 (una sube, otra baja), blanco ≈ 0 (sin relación lineal). La <strong>diagonal</strong> siempre es 1 (cada variable consigo misma). Lee la <em>fila/columna de <code>charges</code></em> para ver qué variable se le acerca más al rojo.</p>
+
+<h2>6. Resultado aplicado (verificado en el dataset)</h2>
+<table>
+  <tr><th width="40%">Variable vs charges</th><th width="20%">Pearson r</th><th width="40%">Lectura</th></tr>
+  <tr><td>smoker (fumador)</td><td>+0.79</td><td>Fuerte — el factor dominante</td></tr>
+  <tr><td>age (edad)</td><td>+0.30</td><td>Débil-moderada</td></tr>
+  <tr><td>bmi (IMC)</td><td>+0.20</td><td>Débil de forma lineal</td></tr>
+  <tr><td>children</td><td>+0.07</td><td>Despreciable</td></tr>
+  <tr><td>sex (sexo)</td><td>−0.06</td><td>Despreciable</td></tr>
+</table>
+
+<h2>7. Comparación de grupos: boxplots y violin plots</h2>
+<p>El mapa de calor no funciona con categorías crudas. Para comparar <code>charges</code> entre grupos se usan <strong>boxplots</strong> o <strong>violin plots</strong>.</p>
+<pre>for col in ["smoker", "region", "sex"]:
+    sns.boxplot(x=col, y="charges", data=df)   # usa el df ORIGINAL con texto
+    plt.title(f"Cargos por {col}")
+    plt.savefig(f"../reports/figures/box_charges_{col}.png", dpi=150, bbox_inches="tight"); plt.show()</pre>
+<p><strong>Boxplot vs violin plot:</strong> el boxplot muestra mediana, cuartiles y outliers; el <em>violin plot</em> añade la <em>forma</em> de la distribución (dónde se concentran los datos). Para <code>smoker</code>, el violín de fumadores se ve «gordo» en valores altos.</p>
+<div class="verify"><strong>Qué vas a observar:</strong> la caja de fumadores está muy por encima (mediana ≈ $34 000 vs ≈ $7 300 en no fumadores). Por <code>region</code> y <code>sex</code> las cajas casi se solapan → poca diferencia. Esto confirma numéricamente lo que dijo la correlación.</div>
+
+<h2>8. Advertencia científica imprescindible</h2>
+<div class="warn"><strong>Correlación ≠ causalidad.</strong> Que <code>smoker</code> y <code>charges</code> estén correlacionados no <em>prueba</em> por sí solo que fumar cause el gasto; lo sugiere fuertemente. La causalidad se sostiene aquí porque además existe <strong>evidencia médica externa</strong> (Xu et al., 2015). Redacta la conclusión con este matiz: «asociado con», no «causa», salvo que cites evidencia causal.</div>
+
+<h2>9. Checklist del entregable (<code>02_correlacion.ipynb</code>)</h2>
+<ul>
+  <li>☐ Heatmap de correlación (Pearson) con buen formato, guardado en <code>reports/figures/</code>.</li>
+  <li>☐ Ranking de correlación con <code>charges</code> e interpretación <strong>en texto</strong>.</li>
+  <li>☐ Boxplots/violin de <code>charges</code> por <code>smoker</code>, <code>region</code> y <code>sex</code>.</li>
+  <li>☐ 1–2 párrafos de conclusión: variables más relevantes y por qué.</li>
+  <li>☐ (Recomendado) mención de Spearman y de la advertencia correlación≠causalidad.</li>
+</ul>
+
+<h2>Referencias (APA 7)</h2>
+<p class="small">
+Chapman, P., Clinton, J., Kerber, R., Khabaza, T., Reinartz, T., Shearer, C., &amp; Wirth, R. (2000). <em>CRISP-DM 1.0: Step-by-step data mining guide</em>. SPSS Inc.<br><br>
+Schober, P., Boer, C., &amp; Schwarte, L. A. (2018). Correlation coefficients: Appropriate use and interpretation. <em>Anesthesia &amp; Analgesia, 126</em>(5), 1763–1768. https://doi.org/10.1213/ANE.0000000000002864<br><br>
+Spearman, C. (1904). The proof and measurement of association between two things. <em>The American Journal of Psychology, 15</em>(1), 72–101. https://doi.org/10.2307/1412159<br><br>
+Waskom, M. L. (2021). seaborn: Statistical data visualization. <em>Journal of Open Source Software, 6</em>(60), 3021. https://doi.org/10.21105/joss.03021<br><br>
+Xu, X., Bishop, E. E., Kennedy, S. M., Simpson, S. A., &amp; Pechacek, T. F. (2015). Annual healthcare spending attributable to cigarette smoking: An update. <em>American Journal of Preventive Medicine, 48</em>(3), 326–333. https://doi.org/10.1016/j.amepre.2014.10.012
+</p>
+
+</body>
+</html>
