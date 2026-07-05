@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Fase Día 5 — Análisis de Clusters (K-means)</title>
+<style>
+  @page { margin: 2cm; }
+  body { font-family: "Liberation Serif", Georgia, serif; font-size: 12pt; line-height: 1.5; color: #1a1a1a; margin: 0; }
+  h1 { font-family: "Liberation Sans", Arial, sans-serif; font-size: 21pt; color: #0b3d5c; border-bottom: 3px solid #0b3d5c; padding-bottom: 6px; }
+  h2 { font-family: "Liberation Sans", Arial, sans-serif; font-size: 15pt; color: #0b3d5c; margin-top: 20px; border-left: 5px solid #2a80b9; padding-left: 8px; }
+  h3 { font-family: "Liberation Sans", Arial, sans-serif; font-size: 12.5pt; color: #23566e; margin-bottom: 4px; }
+  code, .mono { font-family: "Liberation Mono", "Courier New", monospace; font-size: 10.5pt; }
+  pre { background: #f4f6f8; border: 1px solid #d6dde2; border-radius: 4px; padding: 8px 10px; font-family: "Liberation Mono", monospace; font-size: 9.5pt; white-space: pre-wrap; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 10.5pt; }
+  th, td { border: 1px solid #b8c4cc; padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: #e7eef3; color: #0b3d5c; }
+  .formula { background: #f0f5fa; border: 1px solid #cfe0ee; border-radius: 5px; padding: 10px 14px; margin: 12px 0; text-align: center; font-size: 12pt; }
+  .formula .name { display:block; font-size: 9.5pt; color:#0b3d5c; font-family:"Liberation Sans",Arial,sans-serif; margin-bottom:6px; letter-spacing:.5px; }
+  .callout { background: #fff8e1; border-left: 5px solid #f0ad4e; padding: 8px 12px; margin: 12px 0; }
+  .verify { background: #eaf7ea; border-left: 5px solid #4caf50; padding: 8px 12px; margin: 12px 0; }
+  .warn { background: #fdecea; border-left: 5px solid #e15241; padding: 8px 12px; margin: 12px 0; }
+  .dep { background: #eef2fb; border-left: 5px solid #3f51b5; padding: 8px 12px; margin: 12px 0; }
+  .cover-sub { color: #555; font-size: 12pt; }
+  .tag { font-family: "Liberation Sans", Arial, sans-serif; font-size: 9pt; background:#0b3d5c; color:#fff; padding:2px 8px; border-radius: 10px; }
+  a { color: #1a5f8a; } .small { font-size: 9.5pt; color: #555; }
+  .var { font-style: italic; }
+</style>
+</head>
+<body>
+
+<p><span class="tag">FASE · DÍA 5 · Serie de fases PIA TSCI 3 · Equipo 3</span></p>
+<h1>Análisis de Clusters con K-means</h1>
+<p class="cover-sub">Entregable: <code>04_clustering.ipynb</code> · Responsables: José Antonio, Ángel · Punto de partida: dataset limpio del Día 1.</p>
+<p class="small">Investigación de apoyo con fórmulas, código e interpretación explicados para persona e IA. Referencias APA al final.</p>
+
+<h2>1. Objetivo de la fase</h2>
+<p>El <strong>clustering</strong> (agrupamiento) es <em>aprendizaje no supervisado</em>: no hay una «respuesta correcta» que predecir; el algoritmo busca <strong>grupos naturales</strong> de asegurados parecidos entre sí. Objetivo del proyecto: descubrir <strong>perfiles de riesgo</strong> (p. ej., «jóvenes de bajo costo» vs «IMC alto y costo elevado»). Usaremos <strong>K-means</strong>, propuesto por MacQueen (1967) y Lloyd (1982).</p>
+
+<div class="dep"><strong>🔌 Cableado / dependencias.</strong>
+<ul>
+  <li><strong>Recibe de Día 1 (setup):</strong> el dataset limpio. Aquí NO se usa el <code>df_numerico</code> con dummies de la regresión, sino las variables numéricas crudas <code>age, bmi, charges</code> (las sugeridas por el plan).</li>
+  <li><strong>Recibe de Día 2 (EDA):</strong> el conocimiento de las escalas tan distintas de <code>age</code> (18–64), <code>bmi</code> (16–53) y <code>charges</code> (1 000–64 000) → por eso <strong>hay que escalar</strong> (ver §3).</li>
+  <li><strong>Es independiente de la regresión (Día 4):</strong> son técnicas paralelas. La regresión <em>explica/predice</em>; el clustering <em>segmenta</em>. Se complementan en la interpretación final (Día 6).</li>
+  <li><strong>Entrega a Días 6 y 7:</strong> los perfiles de cada cluster y el scatter coloreado por grupo, que van al documento y la presentación.</li>
+</ul>
+</div>
+
+<h2>2. Cómo funciona K-means (idea + fórmula)</h2>
+<p>K-means divide los datos en <strong>K</strong> grupos. Cada grupo tiene un <strong>centroide</strong> (su punto central). El algoritmo repite dos pasos hasta estabilizarse (Lloyd, 1982):</p>
+<ol>
+  <li><strong>Asignación:</strong> cada punto se une al centroide más cercano (distancia euclidiana).</li>
+  <li><strong>Actualización:</strong> cada centroide se recalcula como el promedio de sus puntos.</li>
+</ol>
+<p>El objetivo que minimiza es la <strong>inercia</strong> o suma de cuadrados intra-cluster (WCSS):</p>
+<div class="formula"><span class="name">INERCIA / WCSS (lo que K-means minimiza)</span><br>
+WCSS = Σ<sub>k=1..K</sub> Σ<sub>xᵢ ∈ Cₖ</sub> ‖ xᵢ − μₖ ‖²
+</div>
+<p><strong>En español:</strong> para cada cluster <span class="var">Cₖ</span> con centroide <span class="var">μₖ</span>, se suman las distancias al cuadrado de sus puntos al centro; luego se suma sobre todos los clusters. Cuanto menor es la inercia, más «apretados» están los grupos. La distancia euclidiana entre dos puntos es √Σ(aᵢ−bᵢ)².</p>
+
+<h2>3. Paso obligatorio: escalar los datos (StandardScaler)</h2>
+<div class="warn"><strong>¡No te saltes esto!</strong> K-means usa distancias euclidianas. Si no se escala, <code>charges</code> (que llega a 64 000) <strong>dominaría</strong> por completo a <code>age</code> (máx 64) y <code>bmi</code> (máx 53): el clustering agruparía prácticamente solo por gasto. Escalar pone a todas las variables en igualdad de condiciones (IBM, s.f.; documentación de scikit-learn).</p></div>
+<div class="formula"><span class="name">ESTANDARIZACIÓN Z-SCORE (StandardScaler)</span><br>
+z = ( x − μ ) / σ
+</div>
+<p><strong>En español:</strong> a cada valor se le resta la media (<span class="var">μ</span>) de su columna y se divide entre su desviación estándar (<span class="var">σ</span>). El resultado: cada variable queda con <strong>media 0 y desviación 1</strong>, sin unidades, comparables entre sí.</p>
+
+<h2>4. Elegir K: el método del codo (elbow)</h2>
+<p>¿Cuántos grupos? El <strong>método del codo</strong> (Thorndike, 1953) prueba varios valores de K y grafica la inercia. Al aumentar K la inercia siempre baja; se busca el <strong>«codo»</strong>: el punto donde bajar más deja de aportar mucho.</p>
+<pre>from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+
+X = df[["age", "bmi", "charges"]]
+X_scaled = StandardScaler().fit_transform(X)     # media 0, desv 1
+
+inercias = []
+for k in range(1, 11):
+    km = KMeans(n_clusters=k, random_state=42, n_init=10).fit(X_scaled)
+    inercias.append(km.inertia_)
+plt.plot(range(1, 11), inercias, marker="o")
+plt.xlabel("Número de clusters (K)"); plt.ylabel("Inercia (WCSS)")
+plt.title("Método del codo"); plt.savefig("../reports/figures/codo.png", dpi=150, bbox_inches="tight"); plt.show()</pre>
+<h3>Cómo leer la gráfica del codo</h3>
+<p>Es una curva descendente. Busca dónde el descenso «se dobla» formando un ángulo, como un codo. Ese K es el elegido. Para estas variables suele salir <strong>K = 3 o 4</strong>.</p>
+<div class="callout"><strong>Valida con la silueta (más fiable).</strong> El codo a veces no es claro. El <strong>coeficiente de silueta</strong> (Rousseeuw, 1987) va de −1 a +1 y mide qué tan bien separado está cada punto de su grupo respecto a los vecinos; se elige el K con mayor silueta promedio. Si codo y silueta discrepan, se prefiere la silueta.</p>
+<pre>from sklearn.metrics import silhouette_score
+for k in range(2, 7):
+    lab = KMeans(n_clusters=k, random_state=42, n_init=10).fit_predict(X_scaled)
+    print(k, silhouette_score(X_scaled, lab))</pre></div>
+
+<h2>5. Aplicar K-means y visualizar</h2>
+<pre>k_opt = 3   # el que indique el codo/silueta
+km = KMeans(n_clusters=k_opt, random_state=42, n_init=10)
+df["cluster"] = km.fit_predict(X_scaled)     # etiqueta de grupo por persona
+
+import seaborn as sns
+sns.scatterplot(x="bmi", y="charges", hue="cluster", palette="Set1", data=df)
+plt.title("Clusters de asegurados (IMC vs Cargos)")
+plt.savefig("../reports/figures/clusters.png", dpi=150, bbox_inches="tight"); plt.show()
+
+print(df.groupby("cluster")[["age","bmi","charges"]].mean())   # perfil de cada grupo</pre>
+<div class="callout"><strong>Detalles del código:</strong> <code>random_state=42</code> hace el resultado reproducible; <code>n_init=10</code> corre el algoritmo 10 veces con distintos inicios y se queda con el mejor (K-means depende del punto de partida). Se grafica con las variables sin escalar para que los ejes sean interpretables (dólares, IMC), pero el <em>agrupamiento</em> se hizo con los datos escalados.</div>
+
+<h2>6. Interpretar los clusters (lo más importante)</h2>
+<p>Un cluster sin interpretar no vale. Usa <code>groupby("cluster").mean()</code> para leer el perfil promedio de cada grupo y <strong>ponle nombre</strong>. Ejemplo del tipo de resultado esperado:</p>
+<table>
+  <tr><th width="16%">Cluster</th><th width="42%">Perfil promedio</th><th width="42%">Nombre sugerido</th></tr>
+  <tr><td>0</td><td>Jóvenes, IMC normal, cargos bajos</td><td>Bajo riesgo</td></tr>
+  <tr><td>1</td><td>Edad media, IMC alto, cargos moderados-altos</td><td>Riesgo por IMC</td></tr>
+  <tr><td>2</td><td>Cargos muy elevados (suele coincidir con fumadores)</td><td>Alto riesgo / costo elevado</td></tr>
+</table>
+<p class="small">Los perfiles exactos dependen del K y de la corrida; describe los tuyos según lo que muestre tu <code>groupby</code>.</p>
+<div class="warn"><strong>Limitaciones honestas (decláralas).</strong> (1) K-means asume grupos «esféricos» de tamaño similar y es sensible a outliers; con <code>charges</code> sesgada, un grupo puede quedar dominado por los gastos extremos. (2) El resultado depende de qué variables elijas y de la escala. (3) Los grupos son <em>estadísticos</em>, no categorías médicas oficiales. Menciónalo en la interpretación.</div>
+
+<h2>7. Checklist del entregable (<code>04_clustering.ipynb</code>)</h2>
+<ul>
+  <li>☐ Selección de variables (<code>age, bmi, charges</code>) justificada.</li>
+  <li>☐ <strong>Escalado</strong> con <code>StandardScaler</code> antes de K-means.</li>
+  <li>☐ Método del codo graficado (y, recomendado, silueta).</li>
+  <li>☐ K-means aplicado con el K elegido.</li>
+  <li>☐ Scatter de clusters (<code>bmi</code> vs <code>charges</code>) coloreado por grupo, guardado en <code>reports/figures/</code>.</li>
+  <li>☐ Perfil de cada cluster con <code>groupby</code> + interpretación con nombres de riesgo.</li>
+  <li>☐ Limitaciones documentadas. Markdown en cada sección.</li>
+</ul>
+
+<h2>Referencias (APA 7)</h2>
+<p class="small">
+IBM. (s.f.). <em>What is k-means clustering?</em> IBM Think. https://www.ibm.com/think/topics/k-means-clustering<br><br>
+Lloyd, S. P. (1982). Least squares quantization in PCM. <em>IEEE Transactions on Information Theory, 28</em>(2), 129–137. https://doi.org/10.1109/TIT.1982.1056489<br><br>
+MacQueen, J. (1967). Some methods for classification and analysis of multivariate observations. En <em>Proceedings of the Fifth Berkeley Symposium on Mathematical Statistics and Probability</em> (Vol. 1, pp. 281–297). University of California Press.<br><br>
+Pedregosa, F., Varoquaux, G., Gramfort, A., Michel, V., Thirion, B., Grisel, O., … Duchesnay, É. (2011). Scikit-learn: Machine learning in Python. <em>Journal of Machine Learning Research, 12</em>, 2825–2830.<br><br>
+Rousseeuw, P. J. (1987). Silhouettes: A graphical aid to the interpretation and validation of cluster analysis. <em>Journal of Computational and Applied Mathematics, 20</em>, 53–65. https://doi.org/10.1016/0377-0427(87)90125-7<br><br>
+Thorndike, R. L. (1953). Who belongs in the family? <em>Psychometrika, 18</em>(4), 267–276. https://doi.org/10.1007/BF02289263
+</p>
+
+</body>
+</html>

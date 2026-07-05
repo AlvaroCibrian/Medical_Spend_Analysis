@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Investigación 3 — Guía de aprendizaje: cómo hacer el proyecto</title>
+<style>
+  @page { margin: 2.2cm; }
+  body { font-family: "Liberation Serif", Georgia, serif; font-size: 12pt; line-height: 1.5; color: #1a1a1a; margin: 0; }
+  h1 { font-family: "Liberation Sans", Arial, sans-serif; font-size: 22pt; color: #0b3d5c; border-bottom: 3px solid #0b3d5c; padding-bottom: 6px; }
+  h2 { font-family: "Liberation Sans", Arial, sans-serif; font-size: 15pt; color: #0b3d5c; margin-top: 22px; border-left: 5px solid #2a80b9; padding-left: 8px; }
+  h3 { font-family: "Liberation Sans", Arial, sans-serif; font-size: 12.5pt; color: #23566e; margin-bottom: 4px; }
+  code, .mono { font-family: "Liberation Mono", "Courier New", monospace; font-size: 10.5pt; }
+  pre { background: #f4f6f8; border: 1px solid #d6dde2; border-radius: 4px; padding: 8px 10px; font-family: "Liberation Mono", monospace; font-size: 10pt; white-space: pre-wrap; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 10.5pt; }
+  th, td { border: 1px solid #b8c4cc; padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: #e7eef3; color: #0b3d5c; }
+  .callout { background: #fff8e1; border-left: 5px solid #f0ad4e; padding: 8px 12px; margin: 12px 0; }
+  .verify { background: #eaf7ea; border-left: 5px solid #4caf50; padding: 8px 12px; margin: 12px 0; }
+  .warn { background: #fdecea; border-left: 5px solid #e15241; padding: 8px 12px; margin: 12px 0; }
+  .phase { background:#0b3d5c; color:#fff; font-family:"Liberation Sans",Arial,sans-serif; padding:4px 10px; border-radius:4px; font-size:11pt; display:inline-block; }
+  .cover-sub { color: #555; font-size: 12pt; }
+  .tag { font-family: "Liberation Sans", Arial, sans-serif; font-size: 9pt; background:#0b3d5c; color:#fff; padding:2px 8px; border-radius: 10px; }
+  a { color: #1a5f8a; } .small { font-size: 9.5pt; color: #555; }
+  .check { font-family:"Liberation Sans",Arial,sans-serif; }
+</style>
+</head>
+<body>
+
+<p><span class="tag">INVESTIGACIÓN 3 de 3 · Serie PIA TSCI 3 · Equipo 3</span></p>
+<h1>Guía de aprendizaje: cómo hacer <em>realmente</em> este proyecto</h1>
+<p class="cover-sub">Una ruta paso a paso, ordenada con la metodología CRISP-DM, para que un estudiante no experto —o una IA colaboradora— lleve el proyecto de principio a fin y cumpla cada criterio de evaluación.</p>
+<p class="small">Esta guía <strong>integra</strong> las Investigaciones 1 (herramientas) y 2 (técnicas y fórmulas) en un plan de acción. No repite las fórmulas; las <em>usa</em>.</p>
+
+<h2>1. ¿Qué vas a construir y qué debes saber antes?</h2>
+<p><strong>Objetivo del proyecto:</strong> identificar qué hábitos de vida y factores demográficos se asocian con mayores gastos médicos, usando el dataset <em>Medical Cost Personal</em>, y comunicarlo con rigor.</p>
+<p><strong>Requisitos mínimos:</strong> nociones básicas de Python, saber abrir una terminal, y haber leído la Investigación 1 (para instalar el entorno) y la 2 (para entender correlación y regresión). No necesitas ser experto: la metodología te lleva de la mano.</p>
+
+<h2>2. El problema real y por qué importa</h2>
+<p>Una aseguradora quiere <strong>fijar primas justas</strong>: cobrar acorde al riesgo real de cada persona. Para eso necesita saber qué factores elevan el gasto. La pregunta de investigación:</p>
+<p style="text-align:center; font-style:italic;">«¿Qué variables (edad, sexo, IMC, hijos, fumar, región) se asocian con cargos médicos más altos, y cuánto pesa cada una?»</p>
+<ul>
+  <li><strong>Variable dependiente (Y):</strong> <code>charges</code> — el gasto médico en USD (lo que queremos explicar).</li>
+  <li><strong>Variables independientes (X):</strong> <code>age, sex, bmi, children, smoker, region</code> (los posibles factores).</li>
+</ul>
+<div class="verify"><strong>Respaldo científico (verificado).</strong> La evidencia revisada por pares confirma que fumar (~11.7% del gasto sanitario de EE.UU.) y la obesidad (+$1 861–2 505/adulto/año) elevan sustancialmente los costos. Esto le da sentido de mundo real al análisis.</div>
+<div class="warn"><strong>Aviso de integridad.</strong> El dataset es <strong>simulado</strong> por Brett Lantz (basado en demografía del Census de EE.UU.), no son pacientes reales. El proyecto es un <em>ejercicio didáctico</em>: las técnicas son reales y transferibles; las cifras exactas, no clínicas. Declararlo demuestra madurez analítica.</div>
+
+<h2>3. La metodología: CRISP-DM</h2>
+<p>Para no trabajar «a lo loco», seguimos <strong>CRISP-DM</strong> (Cross-Industry Standard Process for Data Mining), el proceso estándar de la industria publicado por Chapman et al. (2000). Son <strong>6 fases</strong>, y el proyecto encaja casi 1 a 1 con ellas.</p>
+<table>
+  <tr><th width="30%">Fase CRISP-DM</th><th width="70%">Sección del entregable</th></tr>
+  <tr><td>1. Comprensión del negocio</td><td>Problemática a resolver</td></tr>
+  <tr><td>2. Comprensión de los datos</td><td>Descripción de los datos + EDA inicial</td></tr>
+  <tr><td>3. Preparación de los datos</td><td>Limpieza y codificación</td></tr>
+  <tr><td>4. Modelado</td><td>Análisis (regresión, correlación)</td></tr>
+  <tr><td>5. Evaluación</td><td>Interpretación de resultados</td></tr>
+  <tr><td>6. Despliegue</td><td>Conclusiones, recomendaciones, informe y presentación</td></tr>
+</table>
+<p class="small">Nota: el temario también menciona <strong>SEMMA</strong> (de SAS): Sample, Explore, Modify, Model, Assess. Es una alternativa muy parecida, más centrada en el modelado; CRISP-DM es más completo porque incluye negocio y despliegue.</p>
+
+<h2>4. Manos a la obra: paso a paso por fase</h2>
+
+<h3><span class="phase">FASE 1 · Comprensión del negocio</span></h3>
+<p>Redacta con claridad: (a) el problema, (b) la pregunta, (c) las variables Y y X. Ya está avanzado en el documento del equipo. <strong>Entregable:</strong> sección «Problemática a resolver».</p>
+
+<h3><span class="phase">FASE 2 · Comprensión de los datos</span></h3>
+<pre>import pandas as pd
+df = pd.read_csv("data/insurance.csv")
+df.head(); df.info(); df.describe(include="all")</pre>
+<p>Describe la fuente (Kaggle / Lantz), el tamaño (1 338 registros, 7 variables) y el tipo de cada variable. Haz un EDA inicial: histograma de <code>charges</code>, conteos de <code>smoker</code> y <code>region</code>. <strong>Objetivo:</strong> conocer los datos y detectar anomalías. <strong>Entregable:</strong> «Descripción de los datos».</p>
+
+<h3><span class="phase">FASE 3 · Preparación de los datos</span></h3>
+<pre>df = df.drop_duplicates()                 # quita 1 duplicado -> 1337 filas
+df["sex"] = df["sex"].map({"male":0, "female":1})
+df["smoker"] = df["smoker"].map({"no":0, "yes":1})
+df = pd.get_dummies(df, columns=["region"], drop_first=True)  # evita la trampa dummy</pre>
+<div class="callout">Verifica nulos (<code>df.isnull().sum()</code> → 0) y duplicados antes y después. Documenta cada decisión: «se eliminó 1 duplicado para no sesgar el análisis». La rúbrica premia la <strong>calidad</strong> de esta limpieza (20%).</div>
+
+<h3><span class="phase">FASE 4 · Modelado</span></h3>
+<p>Dos técnicas complementarias (ver fórmulas en la Investigación 2):</p>
+<ol>
+  <li><strong>Correlación</strong> (Pearson y Spearman) + mapa de calor → identifica que <code>smoker</code> domina (r ≈ 0.79).</li>
+  <li><strong>Regresión lineal múltiple</strong> → cuantifica el efecto de cada variable en dólares.</li>
+</ol>
+<pre>from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
+import numpy as np
+
+X = df.drop(columns="charges");  y = df["charges"]
+Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.2, random_state=42)
+modelo = LinearRegression().fit(Xtr, ytr)
+pred = modelo.predict(Xte)
+print("R2:", r2_score(yte, pred))
+print("RMSE:", np.sqrt(mean_squared_error(yte, pred)))
+print("MAE:", mean_absolute_error(yte, pred))</pre>
+<p><strong>Justifica</strong> por qué regresión lineal: la variable objetivo es numérica y continua, y buscamos explicar/predecir su valor a partir de varios factores (justo el caso de uso de la regresión).</p>
+
+<h3><span class="phase">FASE 5 · Evaluación</span></h3>
+<p>Interpreta los números, no solo los reportes:</p>
+<ul>
+  <li><strong>R² ≈ 0.75</strong> ⇒ el modelo explica ~75% de la variación del gasto. Bueno para un modelo lineal simple.</li>
+  <li><strong>Coeficiente de <code>smoker</code> ≈ +$23 000</strong> ⇒ a igualdad de lo demás, fumar se asocia con ~$23 000 más al año.</li>
+  <li>Compara <strong>RMSE vs MAE</strong>: si RMSE ≫ MAE, hay errores grandes puntuales por el sesgo de <code>charges</code>.</li>
+  <li>Menciona <strong>limitaciones</strong>: posible heterocedasticidad; mejora con <code>log(charges)</code>; correlación ≠ causalidad; datos simulados.</li>
+</ul>
+<div class="callout">Este es el criterio de <strong>Interpretación (20%)</strong>. Lo que distingue un 10 de un 7 es <em>conectar los números con el problema</em> y reconocer límites, no solo pegar la salida de la consola.</div>
+
+<h3><span class="phase">FASE 6 · Despliegue (comunicación)</span></h3>
+<p>Aquí «despliegas» los hallazgos como productos:</p>
+<ul>
+  <li><strong>Conclusiones:</strong> el tabaquismo es el factor dominante; IMC y edad importan de forma secundaria; sexo y región casi no influyen.</li>
+  <li><strong>Recomendaciones:</strong> programas de cesación de tabaco; tarifas ajustadas por riesgo; segmentar por perfiles.</li>
+  <li><strong>Informe PDF</strong> (portada institucional, introducción, desarrollo, conclusión, referencias) y <strong>presentación</strong> (Canva/pptx) solo con resultados interpretados.</li>
+</ul>
+
+<h2>5. Checklist contra la rúbrica del profesor</h2>
+<table>
+  <tr><th width="26%">Criterio</th><th width="37%">Peso</th><th width="37%">¿Qué revisar?</th></tr>
+  <tr><td>Selección y descripción de datos</td><td>20%</td><td class="check">Fuente citada, tamaño, variables, justificación de la elección.</td></tr>
+  <tr><td>Preparación de los datos</td><td>20%</td><td class="check">Nulos, duplicados, codificación; EDA claro con gráficas.</td></tr>
+  <tr><td>Análisis de datos</td><td>30%</td><td class="check">Correlación + regresión, con <strong>justificación</strong> de las técnicas y pantallazos de código/resultados.</td></tr>
+  <tr><td>Interpretación de resultados</td><td>20%</td><td class="check">Números explicados, conexión con el problema, limitaciones.</td></tr>
+  <tr><td>Presentación y comunicación</td><td>10%</td><td class="check">Estructura clara, informe PDF + slides.</td></tr>
+</table>
+<div class="verify"><strong>El 30% (Análisis) es el de mayor peso.</strong> Prioriza tener regresión + correlación bien hechas y <em>justificadas</em>. Ahí se gana o se pierde la calificación.</div>
+
+<h2>6. Cómo escribir la interpretación (plantilla)</h2>
+<p>Estructura cada hallazgo en 3 frases:</p>
+<ol>
+  <li><strong>Qué:</strong> «La correlación de <code>smoker</code> con <code>charges</code> es +0.79.»</li>
+  <li><strong>Qué significa:</strong> «Los fumadores gastan en promedio $32 050 vs $8 441 de los no fumadores (~3.8×).»</li>
+  <li><strong>Por qué / con qué límite:</strong> «Coincide con la evidencia médica; pero es correlación, no prueba causal, y los datos son simulados.»</li>
+</ol>
+
+<h2>7. Si eres una IA colaborando en este proyecto</h2>
+<ol>
+  <li>Lee las Investigaciones 1 y 2 de esta carpeta antes de codificar.</li>
+  <li>Sigue las 6 fases en orden; no saltes la preparación de datos.</li>
+  <li>Reporta métricas <em>en el conjunto de prueba</em>, nunca solo en entrenamiento.</li>
+  <li>Sé explícito con las limitaciones (sesgo, causalidad, datos simulados).</li>
+  <li>Genera el informe con <code>scripts/generate_document.py &lt;archivo&gt; pdf</code> y déjalo en <code>docs/generated_docs/</code>.</li>
+</ol>
+
+<h2>8. Para seguir aprendiendo</h2>
+<table>
+  <tr><th width="30%">Recurso</th><th width="70%">Para qué</th></tr>
+  <tr><td><em>An Introduction to Statistical Learning</em> (James et al.)</td><td>Regresión y evaluación, con intuición. PDF gratuito.</td></tr>
+  <tr><td><em>Python Data Science Handbook</em> (VanderPlas)</td><td>pandas, NumPy, matplotlib en profundidad. Gratis en línea.</td></tr>
+  <tr><td>CRISP-DM 1.0 (Chapman et al., 2000)</td><td>La metodología completa, fase por fase.</td></tr>
+  <tr><td>Documentación de scikit-learn</td><td>Ejemplos ejecutables de regresión y métricas.</td></tr>
+</table>
+
+<h2>Referencias</h2>
+<p class="small">
+1. Chapman, P., Clinton, J., Kerber, R., Khabaza, T., Reinartz, T., Shearer, C. &amp; Wirth, R. (2000). <em>CRISP-DM 1.0: Step-by-step data mining guide</em>. SPSS/The CRISP-DM consortium.<br>
+2. Wirth, R. &amp; Hipp, J. (2000). «CRISP-DM: Towards a Standard Process Model for Data Mining». <em>Proc. 4th Int. Conf. Practical Applications of Knowledge Discovery</em>.<br>
+3. Schröer, C., Kruse, F. &amp; Gómez, J. M. (2021). «A Systematic Literature Review on Applying CRISP-DM». <em>Procedia Computer Science</em> 181. <a href="https://www.sciencedirect.com/science/article/pii/S1877050921002416">enlace</a><br>
+4. Lantz, B. (2019). <em>Machine Learning with R</em> (3ª ed.), Packt — origen del dataset. <a href="https://www.kaggle.com/datasets/mirichoi0218/insurance">Kaggle: Medical Cost Personal Dataset</a><br>
+5. James, G. et al. (2021). <em>An Introduction to Statistical Learning</em>. <a href="https://www.statlearning.com/">statlearning.com</a><br>
+6. Xu, X. et al. (2015), gasto sanitario atribuible al tabaquismo — vía <a href="https://ash.org/hidden-costs-healthcare/">ASH</a>; Cawley &amp; Meyerhoefer (2012), costos de obesidad — <a href="https://www.sciencedirect.com/science/article/pii/S1098301516000553">review</a>.
+</p>
+
+</body>
+</html>

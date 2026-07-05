@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Investigación 2 — Técnicas de minería de datos (con fórmulas)</title>
+<style>
+  @page { margin: 2.2cm; }
+  body { font-family: "Liberation Serif", Georgia, serif; font-size: 12pt; line-height: 1.5; color: #1a1a1a; margin: 0; }
+  h1 { font-family: "Liberation Sans", Arial, sans-serif; font-size: 22pt; color: #0b3d5c; border-bottom: 3px solid #0b3d5c; padding-bottom: 6px; }
+  h2 { font-family: "Liberation Sans", Arial, sans-serif; font-size: 15pt; color: #0b3d5c; margin-top: 22px; border-left: 5px solid #2a80b9; padding-left: 8px; }
+  h3 { font-family: "Liberation Sans", Arial, sans-serif; font-size: 12.5pt; color: #23566e; margin-bottom: 4px; }
+  code, .mono { font-family: "Liberation Mono", "Courier New", monospace; font-size: 10.5pt; }
+  pre { background: #f4f6f8; border: 1px solid #d6dde2; border-radius: 4px; padding: 8px 10px; font-family: "Liberation Mono", monospace; font-size: 10pt; white-space: pre-wrap; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 10.5pt; }
+  th, td { border: 1px solid #b8c4cc; padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: #e7eef3; color: #0b3d5c; }
+  .formula { background: #f0f5fa; border: 1px solid #cfe0ee; border-radius: 5px; padding: 12px 14px; margin: 12px 0; text-align: center; font-size: 12pt; font-family: "Liberation Serif", Georgia, serif; }
+  .formula .name { display:block; font-size: 9.5pt; color:#0b3d5c; font-family:"Liberation Sans",Arial,sans-serif; margin-bottom:6px; letter-spacing:.5px; }
+  .callout { background: #fff8e1; border-left: 5px solid #f0ad4e; padding: 8px 12px; margin: 12px 0; }
+  .verify { background: #eaf7ea; border-left: 5px solid #4caf50; padding: 8px 12px; margin: 12px 0; }
+  .warn { background: #fdecea; border-left: 5px solid #e15241; padding: 8px 12px; margin: 12px 0; }
+  .cover-sub { color: #555; font-size: 12pt; }
+  .tag { font-family: "Liberation Sans", Arial, sans-serif; font-size: 9pt; background:#0b3d5c; color:#fff; padding:2px 8px; border-radius: 10px; }
+  a { color: #1a5f8a; } .small { font-size: 9.5pt; color: #555; }
+  .var { font-style: italic; }
+</style>
+</head>
+<body>
+
+<p><span class="tag">INVESTIGACIÓN 2 de 3 · Serie PIA TSCI 3 · Equipo 3</span></p>
+<h1>Técnicas de minería de datos, explicadas con fórmulas</h1>
+<p class="cover-sub">Del análisis exploratorio a la regresión lineal: qué es cada técnica, cuál es su fórmula, qué significa cada símbolo y cómo se aplica al dataset de gastos médicos.</p>
+<p class="small">Cada fórmula se presenta, se traduce a español llano y se acompaña de un ejemplo con los números reales del proyecto. Las expresiones fueron contrastadas con fuentes estadísticas (ver Referencias). <strong>Convención:</strong> <span class="var">n</span> = número de observaciones; <span class="var">x̄</span> = media de x; <span class="var">ŷ</span> = valor predicho; <span class="var">yᵢ</span> = valor real de la observación <span class="var">i</span>.</p>
+
+<h2>1. ¿Dónde encaja este proyecto?</h2>
+<p>La minería de datos usa tres grandes enfoques de aprendizaje automático:</p>
+<table>
+  <tr><th width="26%">Enfoque</th><th width="37%">Idea</th><th width="37%">Ejemplo</th></tr>
+  <tr><td><strong>Supervisado</strong></td><td>Aprender de datos <em>con respuesta conocida</em> para predecir.</td><td>Predecir <code>charges</code> a partir de edad, IMC, fumador…</td></tr>
+  <tr><td>No supervisado</td><td>Encontrar grupos/estructura <em>sin respuesta</em>.</td><td>Agrupar asegurados por perfil de riesgo (K-means).</td></tr>
+  <tr><td>Por refuerzo</td><td>Aprender por ensayo y error con recompensas.</td><td>(No aplica a este proyecto.)</td></tr>
+</table>
+<p>Como la variable objetivo <code>charges</code> es <strong>numérica y conocida</strong>, este es un problema <strong>supervisado de regresión</strong>. La técnica principal es la <strong>regresión lineal</strong>, apoyada por <strong>análisis de correlación</strong> y <strong>visualización</strong>.</p>
+
+<h2>2. Estadística descriptiva (la base del EDA)</h2>
+<p>Antes de modelar hay que <em>describir</em> los datos. Tres medidas esenciales:</p>
+
+<div class="formula"><span class="name">MEDIA (promedio)</span><br>
+x̄ = ( x₁ + x₂ + … + xₙ ) / n = ( 1 / n ) · Σ xᵢ
+</div>
+<p>Suma todos los valores y divide entre cuántos hay. Es el «centro» típico, pero <strong>se deja arrastrar por valores extremos</strong>.</p>
+
+<div class="formula"><span class="name">MEDIANA</span><br>
+valor central al ordenar los datos de menor a mayor
+</div>
+<p>Divide la muestra en dos mitades. A diferencia de la media, <strong>resiste los atípicos</strong>. En <code>charges</code>, la media (~$13 279) es bastante mayor que la mediana (~$9 386): señal de una distribución <strong>sesgada a la derecha</strong> por unos pocos gastos altísimos.</p>
+
+<div class="formula"><span class="name">DESVIACIÓN ESTÁNDAR</span><br>
+s = √[ ( 1 / (n − 1) ) · Σ ( xᵢ − x̄ )² ]
+</div>
+<p>Mide cuánto se «dispersan» los datos alrededor de la media. Se elevan al cuadrado las distancias (para que no se cancelen los signos), se promedian y se saca la raíz para volver a las unidades originales. Se divide entre <span class="var">n−1</span> (no <span class="var">n</span>) por la <em>corrección de Bessel</em>, que evita subestimar la dispersión al trabajar con una muestra.</p>
+<div class="verify"><strong>Verificado en el dataset:</strong> <code>charges</code> tiene media ≈ <strong>$13 279</strong>, mediana ≈ <strong>$9 386</strong>, desviación ≈ <strong>$12 110</strong>, mínimo ≈ $1 122 y máximo ≈ $63 770. La gran distancia media–mediana confirma el sesgo.</div>
+
+<h2>3. Análisis de correlación</h2>
+<p>La <strong>correlación</strong> mide qué tan asociadas están dos variables. El coeficiente va de <strong>−1 a +1</strong>: +1 asociación positiva perfecta, −1 negativa perfecta, 0 sin asociación lineal.</p>
+
+<h3>3.1 Correlación de Pearson (relación lineal)</h3>
+<div class="formula"><span class="name">COEFICIENTE DE PEARSON (r)</span><br>
+r = [ Σ (xᵢ − x̄)(yᵢ − ȳ) ] / √[ Σ(xᵢ − x̄)² · Σ(yᵢ − ȳ)² ]
+</div>
+<p><strong>En español:</strong> el numerador es la <em>covarianza</em> (¿cuando x sube, y sube?); el denominador normaliza dividiendo por las dispersiones de cada variable, para que el resultado quede acotado entre −1 y 1. Pearson asume que la relación es <strong>lineal</strong>, que las variables son de escala de intervalo/razón y aproximadamente <strong>normales</strong>, y es <strong>sensible a valores atípicos</strong>.</p>
+
+<h3>3.2 Correlación de Spearman (relación monótona)</h3>
+<p>Cuando la relación no es lineal (pero sí consistente en dirección) o hay atípicos y sesgo, se usa <strong>Spearman</strong>, que aplica Pearson <em>sobre los rangos</em> (posiciones ordenadas) en vez de los valores crudos.</p>
+<div class="formula"><span class="name">COEFICIENTE DE SPEARMAN (ρ), sin empates</span><br>
+ρ = 1 − [ 6 · Σ dᵢ² ] / [ n · (n² − 1) ]
+</div>
+<p>Donde <span class="var">dᵢ</span> = diferencia de rangos de la observación <span class="var">i</span>. Al basarse en rangos, Spearman capta relaciones <strong>monótonas</strong> aunque no sean rectas y es <strong>más robusto a atípicos</strong>.</p>
+<table>
+  <tr><th width="26%"></th><th width="37%">Pearson</th><th width="37%">Spearman</th></tr>
+  <tr><td>Detecta</td><td>Relación lineal</td><td>Relación monótona (no necesariamente lineal)</td></tr>
+  <tr><td>Datos</td><td>Numéricos, ~normales</td><td>Numéricos u ordinales, sesgados OK</td></tr>
+  <tr><td>Atípicos</td><td>Sensible</td><td>Robusto</td></tr>
+</table>
+<div class="callout"><strong>Recomendación para este proyecto.</strong> Como <code>charges</code> está sesgada y tiene atípicos, conviene reportar <strong>ambas</strong> correlaciones. Si difieren mucho, es señal de no-linealidad (justo lo que ocurre con IMC entre fumadores).</div>
+
+<h3>3.3 Resultado aplicado (calculado sobre el dataset)</h3>
+<table>
+  <tr><th width="26%">Variable vs <code>charges</code></th><th width="37%">Pearson (r)</th><th width="37%">Lectura</th></tr>
+  <tr><td><strong>smoker</strong> (fumador)</td><td><strong>+0.79</strong></td><td>Asociación fuerte: el factor dominante.</td></tr>
+  <tr><td>age (edad)</td><td>+0.30</td><td>Asociación moderada-baja.</td></tr>
+  <tr><td>bmi (IMC)</td><td>+0.20</td><td>Débil de forma lineal (pero clave al interactuar con fumar).</td></tr>
+  <tr><td>children (hijos)</td><td>+0.07</td><td>Casi nula.</td></tr>
+  <tr><td>sex (sexo)</td><td>−0.06</td><td>Prácticamente irrelevante.</td></tr>
+</table>
+<div class="verify"><strong>Comprobación cruzada.</strong> El gasto medio de un <strong>fumador ≈ $32 050</strong> frente a <strong>$8 441</strong> de un no fumador: una diferencia de ~<strong>3.8×</strong>. El número coincide con la correlación alta y con la evidencia médica externa (ver §7).</div>
+<div class="warn"><strong>Advertencia científica: correlación ≠ causalidad.</strong> Una correlación alta no prueba que una variable <em>cause</em> la otra; podría haber un tercer factor. La correlación <em>sugiere</em> relaciones; la <em>regresión</em> y el conocimiento del dominio las contextualizan.</div>
+
+<h2>4. Preparar variables categóricas</h2>
+<p>Los modelos numéricos no entienden texto («yes», «southeast»). Hay que codificar:</p>
+<table>
+  <tr><th width="26%">Método</th><th width="37%">Cómo</th><th width="37%">Cuándo</th></tr>
+  <tr><td>Binaria / mapeo</td><td><code>smoker → {no:0, yes:1}</code></td><td>Variables de 2 categorías (sex, smoker).</td></tr>
+  <tr><td>One-hot (dummies)</td><td><code>pd.get_dummies(df, columns=["region"])</code></td><td>Variables nominales de 3+ categorías (region).</td></tr>
+</table>
+<div class="warn"><strong>La «trampa de las variables dummy».</strong> Si una variable tiene <span class="var">k</span> categorías y creas <span class="var">k</span> columnas dummy más el intercepto, se produce <strong>multicolinealidad perfecta</strong> (una columna es combinación exacta de las otras) y la regresión falla o se vuelve inestable. La solución es soltar una categoría de referencia: <code>drop_first=True</code>, dejando <span class="var">k−1</span> columnas. Cada coeficiente se interpreta entonces <em>respecto</em> a la categoría omitida.</div>
+
+<h2>5. Regresión lineal</h2>
+<h3>5.1 Regresión lineal simple</h3>
+<p>Modela la variable dependiente <span class="var">y</span> como una recta en función de una sola <span class="var">x</span>:</p>
+<div class="formula"><span class="name">MODELO SIMPLE</span><br>
+ŷ = β₀ + β₁·x
+</div>
+<p><span class="var">β₀</span> (intercepto) = valor esperado de <span class="var">y</span> cuando <span class="var">x</span>=0. <span class="var">β₁</span> (pendiente) = cuánto cambia <span class="var">y</span> por cada unidad que sube <span class="var">x</span>. El «sombrero» en <span class="var">ŷ</span> indica que es una <em>predicción</em>, no el valor real.</p>
+
+<h3>5.2 ¿Cómo se eligen β₀ y β₁? Mínimos cuadrados (OLS)</h3>
+<p>Se busca la recta que <strong>minimiza la suma de los errores al cuadrado</strong> (la distancia vertical entre cada punto real y la recta):</p>
+<div class="formula"><span class="name">CRITERIO DE MÍNIMOS CUADRADOS</span><br>
+min Σ ( yᵢ − ŷᵢ )² = min Σ ( yᵢ − β₀ − β₁·xᵢ )²
+</div>
+<p>Resolver ese mínimo (derivando e igualando a cero) da fórmulas cerradas:</p>
+<div class="formula"><span class="name">ESTIMADORES OLS (caso simple)</span><br>
+β₁ = [ Σ (xᵢ − x̄)(yᵢ − ȳ) ] / [ Σ (xᵢ − x̄)² ] &nbsp;&nbsp;;&nbsp;&nbsp; β₀ = ȳ − β₁·x̄
+</div>
+
+<h3>5.3 Regresión lineal múltiple</h3>
+<p>Con varias variables independientes (edad, IMC, fumador, hijos, región):</p>
+<div class="formula"><span class="name">MODELO MÚLTIPLE</span><br>
+ŷ = β₀ + β₁x₁ + β₂x₂ + … + βₚxₚ
+</div>
+<p>En forma matricial, la solución OLS es compacta y elegante:</p>
+<div class="formula"><span class="name">SOLUCIÓN MATRICIAL (ecuaciones normales)</span><br>
+β = ( Xᵀ X )⁻¹ Xᵀ y
+</div>
+<p>Donde <span class="var">X</span> es la matriz de datos (una fila por persona, una columna por variable + una de unos para el intercepto), <span class="var">y</span> el vector de gastos y <span class="var">β</span> el vector de coeficientes. Cada <span class="var">βⱼ</span> se interpreta como: <em>«manteniendo las demás variables constantes, subir <span class="var">xⱼ</span> en una unidad cambia el gasto en <span class="var">βⱼ</span> dólares»</em>.</p>
+<div class="callout"><strong>Interpretación esperada.</strong> En este dataset, el coeficiente de <code>smoker</code> ronda los <strong>+$23 000–24 000</strong>: ser fumador, a igualdad de edad/IMC/etc., se asocia con ~$23 000 más de gasto anual. Es, por mucho, el mayor efecto.</p></div>
+
+<h3>5.4 Supuestos del modelo (teorema de Gauss-Markov)</h3>
+<p>OLS da el «Mejor Estimador Lineal Insesgado» (BLUE) <strong>si</strong> se cumplen:</p>
+<table>
+  <tr><th width="30%">Supuesto</th><th width="70%">Qué significa</th></tr>
+  <tr><td>Linealidad</td><td>La relación entre X y <span class="var">y</span> es lineal en los parámetros.</td></tr>
+  <tr><td>Muestreo aleatorio</td><td>Las observaciones se tomaron al azar de la población.</td></tr>
+  <tr><td>No multicolinealidad perfecta</td><td>Ninguna variable X es combinación exacta de otras.</td></tr>
+  <tr><td>Exogeneidad (media cero del error)</td><td>El error no se correlaciona con las X: E[ε|X]=0.</td></tr>
+  <tr><td>Homocedasticidad</td><td>La varianza del error es constante para todo valor de X.</td></tr>
+</table>
+<div class="warn"><strong>Limitación real de este proyecto.</strong> Como <code>charges</code> está muy sesgada, es habitual que se viole la <strong>homocedasticidad</strong> y la normalidad de los residuos. Una mejora frecuente es modelar <strong>log(charges)</strong> en vez de <code>charges</code>. Reportar esta limitación suma puntos en el criterio de interpretación.</div>
+
+<h2>6. Evaluar el modelo</h2>
+<p>¿Qué tan bueno es? Se compara lo predicho (<span class="var">ŷ</span>) contra lo real (<span class="var">y</span>).</p>
+
+<div class="formula"><span class="name">COEFICIENTE DE DETERMINACIÓN (R²)</span><br>
+R² = 1 − [ Σ (yᵢ − ŷᵢ)² ] / [ Σ (yᵢ − ȳ)² ]
+</div>
+<p>Proporción de la variación de <span class="var">y</span> que el modelo <strong>logra explicar</strong>, de 0 a 1. R²=0.75 ⇒ el modelo explica el 75% de la variabilidad del gasto. El numerador es el error del modelo; el denominador, el error de simplemente usar la media.</p>
+
+<div class="formula"><span class="name">R² AJUSTADO</span><br>
+R²ₐⱼ = 1 − ( 1 − R² ) · ( n − 1 ) / ( n − p − 1 )
+</div>
+<p>Penaliza agregar variables inútiles (<span class="var">p</span> = número de predictores). Sube <em>solo</em> si la variable nueva aporta más de lo que aportaría el azar. Es el más honesto para comparar modelos con distinto número de variables.</p>
+
+<div class="formula"><span class="name">RAÍZ DEL ERROR CUADRÁTICO MEDIO (RMSE)</span><br>
+RMSE = √[ ( 1 / n ) · Σ ( yᵢ − ŷᵢ )² ]
+</div>
+<p>Error típico de predicción, <strong>en las mismas unidades</strong> que <span class="var">y</span> (dólares). Al elevar al cuadrado, castiga más los errores grandes. RMSE = $6 000 ⇒ el modelo se equivoca, en promedio, unos $6 000.</p>
+
+<div class="formula"><span class="name">ERROR ABSOLUTO MEDIO (MAE)</span><br>
+MAE = ( 1 / n ) · Σ | yᵢ − ŷᵢ |
+</div>
+<p>Promedio de los errores en valor absoluto. Más fácil de interpretar y <strong>más robusto a atípicos</strong> que el RMSE. Si RMSE ≫ MAE, hay errores grandes puntuales (típico con datos sesgados).</p>
+<div class="verify"><strong>Referencia.</strong> La regresión lineal múltiple estándar sobre este dataset suele alcanzar <strong>R² ≈ 0.75</strong>. El gran salto de calidad viene de incluir <code>smoker</code> y su interacción con <code>bmi</code>.</div>
+
+<h3>6.1 No te engañes: entrenamiento vs prueba</h3>
+<p>Un modelo puede memorizar los datos de entrenamiento y fallar con datos nuevos. Por eso se separan:</p>
+<ul>
+  <li><strong>Train/test split:</strong> entrenar con ~80% y evaluar con el 20% no visto.</li>
+  <li><strong>Validación cruzada (k-fold):</strong> repetir el reparto <span class="var">k</span> veces y promediar; estima mejor el desempeño real.</li>
+</ul>
+<table>
+  <tr><th width="26%">Problema</th><th width="37%">Síntoma</th><th width="37%">Idea</th></tr>
+  <tr><td><strong>Overfitting</strong> (sobreajuste)</td><td>R² alto en train, bajo en test</td><td>El modelo memoriza el ruido; simplifícalo.</td></tr>
+  <tr><td><strong>Underfitting</strong> (subajuste)</td><td>R² bajo en ambos</td><td>El modelo es demasiado simple; añade variables/complejidad.</td></tr>
+</table>
+
+<h2>7. Contexto científico: ¿tiene sentido el resultado?</h2>
+<p>Un buen análisis contrasta sus hallazgos con la literatura. La señal «fumar → mucho más gasto» está respaldada por evidencia revisada por pares:</p>
+<ul>
+  <li>El tabaquismo representó cerca del <strong>11.7% de todo el gasto sanitario personal de EE.UU.</strong> (~$226.7 mil millones en 2014).</li>
+  <li>La obesidad se asocia con <strong>+$1 861 a +$2 505 de gasto médico por adulto/año</strong> (revisiones sistemáticas y meta-análisis).</li>
+</ul>
+<div class="warn"><strong>Honestidad sobre los datos.</strong> El dataset <code>insurance.csv</code> es <strong>simulado</strong> (generado por Brett Lantz sobre demografía del Census de EE.UU.), no son historiales médicos reales. Por eso las conclusiones son <strong>didácticas</strong>: ilustran técnicas y coinciden con tendencias reales, pero no deben usarse para decisiones clínicas o de tarificación reales. Declararlo es parte del rigor.</div>
+
+<h2>Referencias</h2>
+<p class="small">
+1. James, G., Witten, D., Hastie, T. &amp; Tibshirani, R. (2021). <em>An Introduction to Statistical Learning</em> (2ª ed.). Springer. <a href="https://www.statlearning.com/">statlearning.com</a> (PDF gratuito).<br>
+2. Schober, P. et al. (2018). «Correlation Coefficients: Appropriate Use and Interpretation». <em>Anesthesia &amp; Analgesia</em> 126(5). <a href="https://journals.lww.com/anesthesia-analgesia/fulltext/2018/05000/correlation_coefficients__appropriate_use_and.50.aspx">enlace</a><br>
+3. Gauss–Markov theorem. <em>Wikipedia / Statistics By Jim</em>. <a href="https://statisticsbyjim.com/regression/gauss-markov-theorem-ols-blue/">statisticsbyjim.com</a><br>
+4. Lantz, B. (2019). <em>Machine Learning with R</em> (3ª ed.), Packt — fuente original del dataset. Espejo de datos: <a href="https://github.com/stedy/Machine-Learning-with-R-datasets">github.com/stedy</a><br>
+5. Xu, X. et al. (2015). «Annual Healthcare Spending Attributable to Cigarette Smoking». <em>Am. J. Prev. Med.</em> — vía <a href="https://ash.org/hidden-costs-healthcare/">ASH</a>.<br>
+6. Cawley, J. &amp; Meyerhoefer, C. (2012). «The medical care costs of obesity». <em>J. Health Econ.</em> — resumen en <a href="https://www.sciencedirect.com/science/article/pii/S1098301516000553">systematic review</a>.<br>
+7. scikit-learn: <a href="https://scikit-learn.org/stable/modules/linear_model.html">Linear Models</a> · statsmodels: <a href="https://www.statsmodels.org/stable/regression.html">Regression</a>
+</p>
+
+</body>
+</html>

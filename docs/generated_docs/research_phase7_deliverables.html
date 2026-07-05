@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Fase Día 7 — Documento PDF y Presentación</title>
+<style>
+  @page { margin: 2cm; }
+  body { font-family: "Liberation Serif", Georgia, serif; font-size: 12pt; line-height: 1.5; color: #1a1a1a; margin: 0; }
+  h1 { font-family: "Liberation Sans", Arial, sans-serif; font-size: 21pt; color: #0b3d5c; border-bottom: 3px solid #0b3d5c; padding-bottom: 6px; }
+  h2 { font-family: "Liberation Sans", Arial, sans-serif; font-size: 15pt; color: #0b3d5c; margin-top: 20px; border-left: 5px solid #2a80b9; padding-left: 8px; }
+  h3 { font-family: "Liberation Sans", Arial, sans-serif; font-size: 12.5pt; color: #23566e; margin-bottom: 4px; }
+  code, .mono { font-family: "Liberation Mono", "Courier New", monospace; font-size: 10.5pt; }
+  pre { background: #f4f6f8; border: 1px solid #d6dde2; border-radius: 4px; padding: 8px 10px; font-family: "Liberation Mono", monospace; font-size: 9.5pt; white-space: pre-wrap; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 10.5pt; }
+  th, td { border: 1px solid #b8c4cc; padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: #e7eef3; color: #0b3d5c; }
+  .callout { background: #fff8e1; border-left: 5px solid #f0ad4e; padding: 8px 12px; margin: 12px 0; }
+  .verify { background: #eaf7ea; border-left: 5px solid #4caf50; padding: 8px 12px; margin: 12px 0; }
+  .warn { background: #fdecea; border-left: 5px solid #e15241; padding: 8px 12px; margin: 12px 0; }
+  .dep { background: #eef2fb; border-left: 5px solid #3f51b5; padding: 8px 12px; margin: 12px 0; }
+  .cover-sub { color: #555; font-size: 12pt; }
+  .tag { font-family: "Liberation Sans", Arial, sans-serif; font-size: 9pt; background:#0b3d5c; color:#fff; padding:2px 8px; border-radius: 10px; }
+  a { color: #1a5f8a; } .small { font-size: 9.5pt; color: #555; }
+</style>
+</head>
+<body>
+
+<p><span class="tag">FASE · DÍA 7 · Serie de fases PIA TSCI 3 · Equipo 3</span></p>
+<h1>Documento PDF final y Presentación</h1>
+<p class="cover-sub">Entregables: PDF institucional + Presentación PPTX · Dos equipos en paralelo (Ángel está en el equipo de Presentación).</p>
+<p class="small">Investigación de apoyo sobre cómo comunicar resultados con rigor y claridad. Referencias APA al final.</p>
+
+<h2>1. Objetivo de la fase</h2>
+<p>En CRISP-DM esta es la <strong>fase de Despliegue</strong>: el análisis solo genera valor si se <em>comunica</em> bien. Se producen dos entregables complementarios: un <strong>documento PDF</strong> exhaustivo (el registro completo) y una <strong>presentación</strong> concisa (solo resultados interpretados).</p>
+
+<div class="dep"><strong>🔌 Cableado / dependencias.</strong>
+<ul>
+  <li><strong>Recibe de Días 2–5:</strong> las gráficas guardadas en <code>reports/figures/</code> y los pantallazos de código/resultados de los 4 notebooks.</li>
+  <li><strong>Recibe de Día 6:</strong> conclusiones, limitaciones y recomendaciones ya redactadas.</li>
+  <li><strong>Recibe de la propuesta aceptada (E3_TSCI3_PIA):</strong> portada institucional e introducción ya escritas — reutilízalas.</li>
+  <li><strong>Herramienta:</strong> el PDF puede generarse desde HTML/DOCX con <code>scripts/generate_document.py</code> (LibreOffice), según <code>scripts/README.md</code>.</li>
+</ul>
+</div>
+
+<h2>2. Equipo Documento PDF (Diego, Yazmin, Juan Pablo, Guillermo, Álvaro)</h2>
+<p>Estructura exigida por el profesor. Sirve de checklist:</p>
+<table>
+  <tr><th width="34%">Sección</th><th width="66%">Contenido / de dónde sale</th></tr>
+  <tr><td>Portada institucional</td><td>Mismo formato de la propuesta aceptada (UANL–FIME, equipo, materia).</td></tr>
+  <tr><td>Introducción</td><td>Reutilizar la de la propuesta; ajustar si hace falta.</td></tr>
+  <tr><td>Desarrollo — Selección y descripción de datos</td><td>Fuente (Kaggle/Lantz), 1 338 registros, 7 variables, tipos.</td></tr>
+  <tr><td>Desarrollo — Preparación</td><td>Limpieza (nulos, 1 duplicado), codificación (Día 1–2).</td></tr>
+  <tr><td>Desarrollo — Análisis</td><td>Capturas de código y resultados de los 4 notebooks (EDA, correlación, regresión, clustering).</td></tr>
+  <tr><td>Desarrollo — Interpretación</td><td>Del Día 6 (Hallazgo→Evidencia→Significado).</td></tr>
+  <tr><td>Conclusión y recomendaciones</td><td>Del Día 6.</td></tr>
+  <tr><td>Referencias</td><td>Kaggle + fuentes consultadas, en formato consistente.</td></tr>
+</table>
+<div class="callout"><strong>Consejo de calidad.</strong> Numera figuras y tablas y refiérete a ellas en el texto («como muestra la Figura 3…»). Mantén un formato uniforme (mismas fuentes, títulos, márgenes). Un PDF ordenado comunica seriedad.</div>
+
+<h2>3. Equipo Presentación (Patricio, Gerardo, José Antonio, Ángel)</h2>
+<p>La presentación muestra <strong>solo resultados ya interpretados</strong>, no el proceso paso a paso. Aquí aplica la ciencia de la <strong>comunicación de datos</strong> (Knaflic, 2015; Tufte, 2001).</p>
+
+<h3>3.1 Principios verificados de storytelling con datos</h3>
+<table>
+  <tr><th width="34%">Principio</th><th width="66%">Cómo aplicarlo</th></tr>
+  <tr><td><strong>Un mensaje por diapositiva</strong></td><td>Cada slide responde una sola idea. Si necesitas dos, haz dos slides.</td></tr>
+  <tr><td><strong>Eliminar el desorden (clutter)</strong></td><td>Quita todo lo que no aporte: bordes, rejillas, decoraciones, datos irrelevantes. Cada elemento cuesta atención (carga cognitiva).</td></tr>
+  <tr><td><strong>Dirigir la mirada</strong></td><td>Resalta con color solo el dato clave (p. ej., la barra de fumadores); deja el resto en gris.</td></tr>
+  <tr><td><strong>Estructura Setup → Insight → Action</strong></td><td>Contexto → qué revela el dato → qué hacer. La gente recuerda 22× mejor un dato dentro de una historia.</td></tr>
+  <tr><td><strong>Espacio en blanco</strong></td><td>Es como las pausas al hablar: da respiro y foco.</td></tr>
+</table>
+
+<h3>3.2 Estructura de slides sugerida</h3>
+<ol>
+  <li><strong>Portada:</strong> equipo, materia, título del proyecto.</li>
+  <li><strong>Objetivo y problemática:</strong> resumen en una frase (el «Big Idea»).</li>
+  <li><strong>Hallazgo principal:</strong> matriz de correlación → fumar domina (resalta esa celda).</li>
+  <li><strong>Regresión:</strong> qué variables predicen mejor el costo (coeficiente de fumar ≈ +$23 800; R² ≈ 0.75).</li>
+  <li><strong>Perfiles de riesgo:</strong> los clusters, con nombres claros.</li>
+  <li><strong>Conclusiones y recomendaciones:</strong> 3–4 puntos accionables.</li>
+</ol>
+<div class="callout"><strong>Prepara la versión de 3 minutos.</strong> Knaflic recomienda poder contar todo el proyecto en 3 minutos y en una sola frase clave. Si logras eso, la presentación fluye.</div>
+
+<h3>3.3 Errores a evitar en la presentación</h3>
+<div class="warn">
+<ul>
+  <li>Pegar tablas gigantes o el <code>summary()</code> completo del modelo (eso va en el PDF, no en slides).</li>
+  <li>Gráficas 3D, colores chillones o exceso de texto.</li>
+  <li>Explicar el <em>proceso</em> (código) en vez de los <em>resultados</em>.</li>
+  <li>Leer la diapositiva palabra por palabra.</li>
+</ul>
+</div>
+
+<h2>4. Generar el PDF con las herramientas del repo</h2>
+<pre># 1) Escribe el contenido en un HTML (aprovecha el estilo de estas investigaciones)
+# 2) Conviértelo a PDF:
+python scripts/generate_document.py reporte_final.html pdf
+# El PDF queda en docs/generated_docs/</pre>
+<p class="small">Para la presentación, puedes crear el <code>.pptx</code> con <code>python-pptx</code> (ver <code>scripts/README.md</code>) o usar Canva/PowerPoint directamente.</p>
+
+<h2>5. Checklist final</h2>
+<ul>
+  <li>☐ PDF con las 5 secciones (portada, introducción, desarrollo, conclusión, referencias).</li>
+  <li>☐ Capturas de los 4 notebooks integradas y referenciadas.</li>
+  <li>☐ Presentación: un mensaje por slide, sin clutter, resultados interpretados.</li>
+  <li>☐ Coherencia entre PDF y presentación (mismos números y hallazgos).</li>
+  <li>☐ Referencias completas en ambos.</li>
+</ul>
+
+<h2>Referencias (APA 7)</h2>
+<p class="small">
+Chapman, P., Clinton, J., Kerber, R., Khabaza, T., Reinartz, T., Shearer, C., &amp; Wirth, R. (2000). <em>CRISP-DM 1.0: Step-by-step data mining guide</em>. SPSS Inc.<br><br>
+Knaflic, C. N. (2015). <em>Storytelling with data: A data visualization guide for business professionals</em>. Wiley.<br><br>
+Tufte, E. R. (2001). <em>The visual display of quantitative information</em> (2nd ed.). Graphics Press.
+</p>
+
+</body>
+</html>

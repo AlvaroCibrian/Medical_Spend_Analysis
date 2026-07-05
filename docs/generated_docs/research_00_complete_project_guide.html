@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Guía Completa del Proyecto — De principio a fin</title>
+<style>
+  @page { margin: 2cm; }
+  body { font-family: "Liberation Serif", Georgia, serif; font-size: 12pt; line-height: 1.5; color: #1a1a1a; margin: 0; }
+  h1 { font-family: "Liberation Sans", Arial, sans-serif; font-size: 23pt; color: #0b3d5c; border-bottom: 3px solid #0b3d5c; padding-bottom: 6px; }
+  h2 { font-family: "Liberation Sans", Arial, sans-serif; font-size: 16pt; color: #0b3d5c; margin-top: 24px; border-left: 6px solid #2a80b9; padding-left: 9px; }
+  h3 { font-family: "Liberation Sans", Arial, sans-serif; font-size: 13pt; color: #23566e; margin-bottom: 4px; margin-top: 16px; }
+  h4 { font-family: "Liberation Sans", Arial, sans-serif; font-size: 11.5pt; color: #2a80b9; margin-bottom: 2px; }
+  code, .mono { font-family: "Liberation Mono", "Courier New", monospace; font-size: 10.5pt; }
+  pre { background: #f4f6f8; border: 1px solid #d6dde2; border-radius: 4px; padding: 8px 10px; font-family: "Liberation Mono", monospace; font-size: 9.5pt; white-space: pre-wrap; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 10.5pt; }
+  th, td { border: 1px solid #b8c4cc; padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: #e7eef3; color: #0b3d5c; }
+  .formula { background: #f0f5fa; border: 1px solid #cfe0ee; border-radius: 5px; padding: 10px 14px; margin: 12px 0; text-align: center; font-size: 12pt; }
+  .formula .name { display:block; font-size: 9.5pt; color:#0b3d5c; font-family:"Liberation Sans",Arial,sans-serif; margin-bottom:6px; letter-spacing:.5px; }
+  .callout { background: #fff8e1; border-left: 5px solid #f0ad4e; padding: 8px 12px; margin: 12px 0; }
+  .verify { background: #eaf7ea; border-left: 5px solid #4caf50; padding: 8px 12px; margin: 12px 0; }
+  .warn { background: #fdecea; border-left: 5px solid #e15241; padding: 8px 12px; margin: 12px 0; }
+  .dep { background: #eef2fb; border-left: 5px solid #3f51b5; padding: 8px 12px; margin: 12px 0; }
+  .cover-sub { color: #555; font-size: 13pt; }
+  .tag { font-family: "Liberation Sans", Arial, sans-serif; font-size: 9pt; background:#0b3d5c; color:#fff; padding:2px 8px; border-radius: 10px; }
+  a { color: #1a5f8a; } .small { font-size: 9.5pt; color: #555; }
+  .var { font-style: italic; }
+  .toc li { margin-bottom: 2px; }
+</style>
+</head>
+<body>
+
+<p><span class="tag">GUÍA MAESTRA · Serie PIA TSCI 3 · Equipo 3 · UANL–FIME</span></p>
+<h1>Cómo realizar el proyecto completo</h1>
+<p class="cover-sub">Guía única de principio a fin del proyecto «Análisis del Impacto de Hábitos de Vida y Factores Demográficos en los Gastos Médicos de Personas Aseguradas».</p>
+<p class="small">Documento autónomo y didáctico. Explica la propuesta entera, el código, las fórmulas y las palabras técnicas de forma sencilla, para que <strong>cualquier colaborador del repositorio —o una IA— pueda ejecutar el proyecto sin conocimientos previos avanzados</strong>. Todo lo técnico está contrastado con fuentes científicas citadas en APA al final. Para profundizar en una fase concreta, existen documentos dedicados (<code>research_phase2…7</code>) en esta misma carpeta.</p>
+
+<h2>0. Cómo usar esta guía</h2>
+<p>Léela en orden si empiezas de cero. Si ya sabes tu fase, ve directo a su sección, pero <strong>revisa siempre el «Cableado» (dependencias)</strong> para saber qué necesitas de tus compañeros y qué debes entregarles. Convenciones:</p>
+<table>
+  <tr><th width="26%">Marca</th><th width="74%">Significado</th></tr>
+  <tr><td>🟩 Verificado</td><td>Dato comprobado con los datos o con la literatura.</td></tr>
+  <tr><td>🟦 Cableado</td><td>Dependencia entre fases: qué recibe y qué entrega.</td></tr>
+  <tr><td>🟨 Consejo</td><td>Buena práctica que mejora la calificación.</td></tr>
+  <tr><td>🟥 Advertencia</td><td>Error común o límite científico que hay que declarar.</td></tr>
+</table>
+
+<h2>1. Glosario: las palabras técnicas, en fácil</h2>
+<p>Si una palabra te frena, búscala aquí antes de seguir.</p>
+<table>
+  <tr><th width="28%">Término</th><th width="72%">Explicación sencilla</th></tr>
+  <tr><td>Minería de datos</td><td>Extraer información útil y patrones de grandes conjuntos de datos.</td></tr>
+  <tr><td>Dataset</td><td>El conjunto de datos: una tabla con filas (personas) y columnas (variables).</td></tr>
+  <tr><td>Variable dependiente (Y)</td><td>Lo que queremos explicar o predecir. Aquí: <code>charges</code> (el gasto médico).</td></tr>
+  <tr><td>Variable independiente (X)</td><td>Los factores que usamos para explicar Y (edad, IMC, fumar…).</td></tr>
+  <tr><td>Aprendizaje supervisado</td><td>Entrenar con datos que ya tienen la respuesta, para predecir. La regresión es supervisada.</td></tr>
+  <tr><td>Aprendizaje no supervisado</td><td>Buscar grupos o estructura sin respuesta previa. El clustering es no supervisado.</td></tr>
+  <tr><td>EDA</td><td>Análisis Exploratorio de Datos: «conocer» los datos con estadísticas y gráficas antes de modelar.</td></tr>
+  <tr><td>Correlación</td><td>Qué tan asociadas están dos variables, en un número de −1 a +1.</td></tr>
+  <tr><td>Regresión lineal</td><td>Una ecuación (recta) que estima Y a partir de las X y mide cuánto pesa cada factor.</td></tr>
+  <tr><td>Clustering</td><td>Agrupar registros parecidos entre sí (perfiles).</td></tr>
+  <tr><td>Coeficiente</td><td>El número que multiplica a una variable en la ecuación; dice cuánto cambia Y por unidad de esa X.</td></tr>
+  <tr><td>Outlier (atípico)</td><td>Un valor muy alejado del resto.</td></tr>
+  <tr><td>Sesgo / asimetría (skew)</td><td>Cuando una distribución tiene una cola larga hacia un lado.</td></tr>
+  <tr><td>Escalar / estandarizar</td><td>Poner variables de escalas distintas en una escala común para compararlas.</td></tr>
+  <tr><td>Centroide</td><td>El punto central de un grupo en clustering.</td></tr>
+  <tr><td>p-value</td><td>Probabilidad de ver un efecto por azar; si es &lt;0.05, el efecto se considera significativo.</td></tr>
+  <tr><td>R²</td><td>Qué proporción de la variación de Y explica el modelo (0 a 1).</td></tr>
+  <tr><td>CRISP-DM</td><td>Metodología estándar de minería de datos en 6 fases.</td></tr>
+  <tr><td>DataFrame</td><td>La tabla de datos dentro de Python (librería pandas).</td></tr>
+</table>
+
+<h2>2. La propuesta: qué problema resolvemos</h2>
+<p>Una <strong>aseguradora médica</strong> quiere fijar primas (precios de póliza) justas: cobrar según el riesgo real de cada persona. Para eso necesita saber <em>qué factores elevan el gasto médico</em>. La pregunta de investigación es:</p>
+<p style="text-align:center; font-style:italic;">«¿Qué hábitos de vida y factores demográficos se asocian con cargos médicos más altos, y cuánto pesa cada uno?»</p>
+<ul>
+  <li><strong>Variable dependiente (Y):</strong> <code>charges</code> — gasto médico anual en dólares.</li>
+  <li><strong>Variables independientes (X):</strong> <code>age</code> (edad), <code>sex</code> (sexo), <code>bmi</code> (IMC), <code>children</code> (dependientes), <code>smoker</code> (fumador), <code>region</code> (región).</li>
+</ul>
+<div class="verify">🟩 <strong>Respaldo del mundo real (verificado con literatura).</strong> El tabaquismo representa ~11.7% de todo el gasto sanitario personal de EE.UU. (~$226.7 mil millones en 2014; Xu et al., 2015) y la obesidad añade ~$1 861–2 505 de gasto por adulto/año (Cawley &amp; Meyerhoefer, 2012). Es decir: el problema que estudiamos es real y económicamente enorme.</div>
+<div class="warn">🟥 <strong>Honestidad sobre los datos.</strong> El dataset <code>insurance.csv</code> es <strong>simulado</strong> por Brett Lantz sobre demografía del Census de EE.UU. (Lantz, 2019); no son pacientes reales. Por eso el proyecto es <em>didáctico</em>: las técnicas y las tendencias son válidas, pero las cifras exactas no sirven para decisiones clínicas o de tarificación reales. Declararlo demuestra madurez.</div>
+
+<h2>3. Los datos: descripción</h2>
+<p>Fuente: Kaggle, <em>Medical Cost Personal Dataset</em> (originado en Lantz, 2019). <strong>7 variables, 1 338 registros</strong> (1 337 tras quitar 1 duplicado), <strong>sin valores nulos</strong>. Cada fila es una persona asegurada.</p>
+<table>
+  <tr><th width="20%">Variable</th><th width="16%">Tipo</th><th width="64%">Descripción</th></tr>
+  <tr><td>age</td><td>Numérica</td><td>Edad (18–64 años).</td></tr>
+  <tr><td>sex</td><td>Categórica</td><td>Sexo: female / male.</td></tr>
+  <tr><td>bmi</td><td>Numérica</td><td>Índice de masa corporal (16–53).</td></tr>
+  <tr><td>children</td><td>Numérica</td><td>Número de dependientes (0–5).</td></tr>
+  <tr><td>smoker</td><td>Categórica</td><td>Fumador: yes / no.</td></tr>
+  <tr><td>region</td><td>Categórica</td><td>Región de EE.UU. (4 valores).</td></tr>
+  <tr><td>charges</td><td>Numérica (Y)</td><td>Gasto médico anual en USD ($1 122–$63 770).</td></tr>
+</table>
+
+<h2>4. El plan: la metodología CRISP-DM y los 7 días</h2>
+<p>Trabajamos con <strong>CRISP-DM</strong> (Chapman et al., 2000), el proceso estándar de minería de datos. Sus 6 fases encajan con nuestro plan de 7 días:</p>
+<table>
+  <tr><th width="20%">Fase CRISP-DM</th><th width="30%">Día / notebook</th><th width="50%">Qué se hace</th></tr>
+  <tr><td>Comprensión del negocio</td><td>—</td><td>Definir el problema y las variables (§2).</td></tr>
+  <tr><td>Comprensión de los datos</td><td>Día 1–2 · <code>00_setup</code>, <code>01_eda</code></td><td>Cargar, describir y explorar.</td></tr>
+  <tr><td>Preparación de los datos</td><td>Día 2 · <code>01_eda</code></td><td>Limpiar y codificar.</td></tr>
+  <tr><td>Modelado</td><td>Días 3–5 · <code>02_correlacion</code>, <code>03_regresion</code>, <code>04_clustering</code></td><td>Correlación, regresión, clustering.</td></tr>
+  <tr><td>Evaluación</td><td>Día 6</td><td>Interpretar y sacar conclusiones.</td></tr>
+  <tr><td>Despliegue</td><td>Día 7</td><td>Documento PDF + presentación.</td></tr>
+</table>
+<p class="small">Nota: el temario también menciona SEMMA (SAS); es similar pero más centrada en el modelado. CRISP-DM es más completa porque incluye negocio y despliegue.</p>
+
+<h2>5. Preparar el entorno (una sola vez)</h2>
+<pre>python3 -m venv .venv            # crea un entorno aislado
+source .venv/bin/activate        # actívalo (Windows: .venv\Scripts\activate)
+pip install -r requirements.txt  # instala pandas, seaborn, sklearn, statsmodels...
+jupyter notebook                 # abre los cuadernos</pre>
+<p>Herramientas y para qué sirven: <strong>pandas/NumPy</strong> (manejo de datos), <strong>matplotlib/seaborn</strong> (gráficas), <strong>scikit-learn</strong> (modelos y métricas), <strong>statsmodels</strong> (regresión con p-values), <strong>LibreOffice</strong> (generar PDFs, vía <code>scripts/generate_document.py</code>).</p>
+
+<h2>6. Estadística que necesitas (con fórmulas explicadas)</h2>
+<div class="formula"><span class="name">MEDIA (promedio)</span><br>x̄ = ( 1 / n ) · Σ xᵢ</div>
+<p>Suma de todos los valores dividida entre cuántos hay. Es el centro típico, pero la <strong>arrastran</strong> los extremos.</p>
+<div class="formula"><span class="name">DESVIACIÓN ESTÁNDAR</span><br>s = √[ ( 1 / (n−1) ) · Σ (xᵢ − x̄)² ]</div>
+<p>Mide la dispersión alrededor de la media. Se dividen entre <span class="var">n−1</span> (corrección de Bessel) para no subestimarla en una muestra.</p>
+<div class="callout">🟨 La <strong>mediana</strong> (valor central al ordenar) resiste los atípicos mejor que la media. En <code>charges</code>, media ($13 279) &gt; mediana ($9 386): señal de <strong>sesgo a la derecha</strong>.</div>
+
+<h2>7. Fase Día 2 — Análisis Exploratorio (EDA)</h2>
+<div class="dep">🟦 <strong>Cableado.</strong> Recibe el dataset limpio del Día 1. Entrega a Días 3–5 el conocimiento de outliers y sesgo, y guarda las gráficas en <code>reports/figures/</code> para el Día 7.</div>
+<h3>7.1 Detección de outliers (regla IQR de Tukey)</h3>
+<div class="formula"><span class="name">VALLAS DE TUKEY</span><br>IQR = Q₃ − Q₁ &nbsp;;&nbsp; inferior = Q₁ − 1.5·IQR &nbsp;;&nbsp; superior = Q₃ + 1.5·IQR</div>
+<p>Q₁ y Q₃ son los cuartiles (25% y 75%). El IQR es el ancho del 50% central. Lo que quede más allá de 1.5·IQR se marca como atípico (Tukey, 1977).</p>
+<pre>sns.boxplot(x=df["charges"]); plt.savefig("../reports/figures/box_charges.png", bbox_inches="tight")</pre>
+<p><strong>Cómo leer un boxplot:</strong> la caja va de Q₁ a Q₃, la línea es la mediana, los bigotes llegan a las vallas y los puntos sueltos son outliers.</p>
+<div class="callout">🟨 <strong>Decisión:</strong> en este dataset los outliers de <code>charges</code>/<code>bmi</code> son casos reales (no errores), así que <strong>se conservan</strong>: son justo los perfiles de riesgo que buscamos.</div>
+<h3>7.2 Distribuciones y sesgo</h3>
+<pre>for c in ["age","bmi","children","charges"]:
+    sns.histplot(df[c], kde=True); plt.title(c); plt.savefig(f"../reports/figures/hist_{c}.png", bbox_inches="tight"); plt.show()
+print(df.select_dtypes("number").skew())</pre>
+<div class="verify">🟩 <code>charges</code> está fuertemente sesgada a la derecha (skew ≈ +1.5); <code>bmi</code> casi simétrica; <code>age</code> casi uniforme.</div>
+<h3>7.3 Categóricas y relaciones</h3>
+<pre>for c in ["sex","smoker","region"]: sns.countplot(x=c, data=df); plt.show()
+sns.scatterplot(x="bmi", y="charges", hue="smoker", data=df)   # color = fumador</pre>
+<div class="verify">🟩 Solo ~20% son fumadores (274/1337). En <code>bmi</code> vs <code>charges</code> aparece una <strong>interacción</strong> clave: entre fumadores, más IMC dispara el gasto; entre no fumadores casi no cambia.</div>
+
+<h2>8. Fase Día 3 — Correlación</h2>
+<div class="dep">🟦 <strong>Cableado.</strong> Usa <code>df_numerico</code> (categorías ya convertidas a número). Entrega a la regresión qué variables se asocian más con <code>charges</code> y avisa de multicolinealidad.</div>
+<div class="formula"><span class="name">CORRELACIÓN DE PEARSON (r) — relación lineal</span><br>r = [ Σ (xᵢ − x̄)(yᵢ − ȳ) ] / √[ Σ(xᵢ − x̄)² · Σ(yᵢ − ȳ)² ]</div>
+<p>El numerador (covarianza) mide si x e y suben juntas; el denominador normaliza para dejar r entre −1 y +1. Pearson mide relación <strong>lineal</strong> y es sensible a outliers. Como <code>charges</code> es sesgada, conviene reportar también <strong>Spearman</strong> (usa rangos, más robusto).</p>
+<pre>corr = df_numerico.corr(method="pearson")
+sns.heatmap(corr, annot=True, cmap="coolwarm", fmt=".2f", vmin=-1, vmax=1)
+print(corr["charges"].sort_values(ascending=False))</pre>
+<p><strong>Cómo leer el heatmap:</strong> rojo ≈ +1 (suben juntas), azul ≈ −1 (opuestas), blanco ≈ 0. Mira la fila de <code>charges</code>.</p>
+<table>
+  <tr><th width="34%">Variable vs charges</th><th width="22%">Pearson r</th><th width="44%">Lectura</th></tr>
+  <tr><td>smoker</td><td>+0.79</td><td>Fuerte — domina</td></tr>
+  <tr><td>age</td><td>+0.30</td><td>Débil-moderada</td></tr>
+  <tr><td>bmi</td><td>+0.20</td><td>Débil (lineal)</td></tr>
+  <tr><td>children</td><td>+0.07</td><td>Despreciable</td></tr>
+  <tr><td>sex</td><td>−0.06</td><td>Despreciable</td></tr>
+</table>
+<div class="warn">🟥 <strong>Correlación ≠ causalidad.</strong> La correlación sugiere, no prueba causa. Redacta «asociado con», no «causa» (salvo que cites evidencia causal como Xu et al., 2015).</div>
+
+<h2>9. Fase Día 4 — Regresión lineal (técnica principal)</h2>
+<div class="dep">🟦 <strong>Cableado.</strong> Usa <code>df_numerico</code> con 8 columnas X (incluye <code>region_northwest/southeast/southwest</code> de <code>get_dummies(drop_first=True)</code>; la región omitida <em>northeast</em> es la referencia). Entrega R², coeficientes y p-values al Día 6/7.</div>
+<div class="formula"><span class="name">MODELO MÚLTIPLE Y SOLUCIÓN OLS</span><br>ŷ = β₀ + β₁x₁ + … + βₚxₚ + ε &nbsp;&nbsp;⟶&nbsp;&nbsp; β = ( Xᵀ X )⁻¹ Xᵀ y</div>
+<p>Cada <span class="var">βⱼ</span> dice cuántos dólares cambia el gasto por una unidad de esa variable, con lo demás constante. Se obtienen por <strong>mínimos cuadrados (OLS)</strong>: minimizan Σ(yᵢ−ŷᵢ)². No hay que calcularlo a mano; lo hace la librería.</p>
+<pre>import statsmodels.api as sm
+X = sm.add_constant(df_numerico.drop(columns="charges"))
+y = df_numerico["charges"]
+modelo = sm.OLS(y, X).fit()
+print(modelo.summary())     # R², coeficientes y p-values de un golpe</pre>
+<div class="formula"><span class="name">R² — qué tan bueno es el modelo</span><br>R² = 1 − [ Σ (yᵢ − ŷᵢ)² ] / [ Σ (yᵢ − ȳ)² ]</div>
+<p>Proporción de la variación del gasto que el modelo explica (0 a 1). El <strong>p-value</strong> de cada variable dice si su efecto es significativo (p&lt;0.05).</p>
+<div class="verify">🟩 <strong>Resultado verificado con estudios replicados:</strong> R² ≈ <strong>0.75–0.76</strong>; coeficiente de <code>smoker</code> ≈ <strong>+$23 800</strong> (23 848 / 23 811 en la literatura); <code>age</code>, <code>bmi</code> y <code>smoker</code> son muy significativas.</div>
+<div class="callout">🟨 <strong>Mejora recomendada:</strong> por el sesgo, ajusta un modelo con <code>y = np.log(charges)</code>; estabiliza la varianza y suele mejorar (Feng et al., 2014). Recuerda que los coeficientes en log se interpretan como % de cambio.</div>
+
+<h2>10. Fase Día 5 — Clustering K-means</h2>
+<div class="dep">🟦 <strong>Cableado.</strong> Usa las numéricas crudas <code>age, bmi, charges</code> (no las dummies). Es paralela a la regresión: una segmenta, la otra predice. Entrega los perfiles de riesgo al Día 6/7.</div>
+<div class="formula"><span class="name">INERCIA (lo que K-means minimiza)</span><br>WCSS = Σ<sub>k</sub> Σ<sub>xᵢ ∈ Cₖ</sub> ‖ xᵢ − μₖ ‖²</div>
+<p>K-means arma <strong>K</strong> grupos y coloca un <strong>centroide</strong> (μₖ) en el centro de cada uno; asigna cada punto al centroide más cercano y repite. Minimiza la suma de distancias al cuadrado dentro de los grupos (Lloyd, 1982).</p>
+<div class="warn">🟥 <strong>Escala obligatoria.</strong> K-means usa distancias; sin escalar, <code>charges</code> (hasta 64 000) aplastaría a <code>age</code> y <code>bmi</code>. Estandariza primero.</div>
+<div class="formula"><span class="name">ESTANDARIZACIÓN Z-SCORE (StandardScaler)</span><br>z = ( x − μ ) / σ</div>
+<pre>from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+X = StandardScaler().fit_transform(df[["age","bmi","charges"]])   # media 0, desv 1
+inercias = [KMeans(n_clusters=k, random_state=42, n_init=10).fit(X).inertia_ for k in range(1,11)]
+plt.plot(range(1,11), inercias, marker="o"); plt.title("Método del codo"); plt.show()</pre>
+<p><strong>Método del codo:</strong> la inercia baja al subir K; se elige el «codo» (donde deja de bajar mucho). Suele salir K=3 o 4. Valida con el <strong>coeficiente de silueta</strong> (Rousseeuw, 1987), que va de −1 a +1 y es más fiable si el codo no es claro.</p>
+<pre>km = KMeans(n_clusters=3, random_state=42, n_init=10)
+df["cluster"] = km.fit_predict(X)
+sns.scatterplot(x="bmi", y="charges", hue="cluster", data=df)
+print(df.groupby("cluster")[["age","bmi","charges"]].mean())   # perfil de cada grupo</pre>
+<div class="callout">🟨 <strong>Interpreta y nombra</strong> cada cluster (ej. «bajo riesgo», «IMC alto costo moderado», «costo elevado»). Un grupo sin nombre no comunica.</div>
+
+<h2>11. Fase Día 6 — Interpretación y conclusiones</h2>
+<p>Consolida los 4 notebooks en una historia con la estructura <strong>Hallazgo → Evidencia → Significado</strong>. La fuerza está en la <em>triangulación</em>: que correlación, regresión y clustering apunten al mismo factor.</p>
+<div class="verify">🟩 <strong>Conclusión central:</strong> fumar es el factor dominante (r=+0.79; +$23 800 con p&lt;0.05; coincide con el cluster de alto costo). Edad e IMC son secundarios; sexo y región, débiles.</div>
+<div class="warn">🟥 <strong>Limitaciones a declarar:</strong> datos simulados; solo EE.UU.; faltan variables (historial médico); correlación≠causalidad; posible heterocedasticidad (mitigable con log).</div>
+<p><strong>Recomendaciones:</strong> primas ajustadas por condición de fumador; programas de cesación de tabaco y control de IMC; segmentación por perfiles; recolectar más variables a futuro.</p>
+
+<h2>12. Fase Día 7 — Documento PDF y presentación</h2>
+<p><strong>PDF</strong> (registro completo): portada institucional, introducción, desarrollo (selección, descripción, preparación, análisis con capturas, interpretación), conclusión, referencias.</p>
+<p><strong>Presentación</strong> (solo resultados interpretados): aplica storytelling con datos (Knaflic, 2015) — un mensaje por diapositiva, sin desorden, resaltar solo el dato clave, estructura Setup→Insight→Action. Slides sugeridas: portada, objetivo, hallazgo de correlación, regresión, perfiles/clusters, conclusiones.</p>
+<pre>python scripts/generate_document.py reporte_final.html pdf   # genera el PDF en docs/generated_docs/</pre>
+
+<h2>13. Mapa a la rúbrica (dónde están los puntos)</h2>
+<table>
+  <tr><th width="46%">Criterio</th><th width="14%">Peso</th><th width="40%">Fase que lo cubre</th></tr>
+  <tr><td>Selección y descripción de datos</td><td>20%</td><td>§2–3 (Días 1–2)</td></tr>
+  <tr><td>Preparación de los datos</td><td>20%</td><td>§7 (Día 2)</td></tr>
+  <tr><td>Análisis de datos</td><td>30%</td><td>§8–10 (Días 3–5)</td></tr>
+  <tr><td>Interpretación de resultados</td><td>20%</td><td>§11 (Día 6)</td></tr>
+  <tr><td>Presentación y comunicación</td><td>10%</td><td>§12 (Día 7)</td></tr>
+</table>
+<div class="callout">🟨 El <strong>30% del Análisis</strong> es el de mayor peso: prioriza que regresión y correlación estén bien hechas y <em>justificadas</em>.</div>
+
+<h2>14. Si eres una IA colaborando</h2>
+<ol>
+  <li>Activa el entorno e instala dependencias.</li>
+  <li>Sigue las 6 fases CRISP-DM en orden; respeta el «Cableado» de cada fase.</li>
+  <li>Reporta métricas en el conjunto de <em>prueba</em>, no solo en entrenamiento.</li>
+  <li>Sé explícito con las limitaciones (datos simulados, causalidad).</li>
+  <li>Genera entregables con <code>scripts/generate_document.py</code> hacia <code>docs/generated_docs/</code>.</li>
+</ol>
+
+<h2>15. Apéndice: todas las fórmulas juntas</h2>
+<table>
+  <tr><th width="30%">Fórmula</th><th width="70%">Para qué sirve</th></tr>
+  <tr><td>x̄ = (1/n)·Σxᵢ</td><td>Media.</td></tr>
+  <tr><td>s = √[(1/(n−1))·Σ(xᵢ−x̄)²]</td><td>Desviación estándar (dispersión).</td></tr>
+  <tr><td>Q₁−1.5·IQR ; Q₃+1.5·IQR</td><td>Vallas de outliers (Tukey).</td></tr>
+  <tr><td>r = Σ(xᵢ−x̄)(yᵢ−ȳ) / √[Σ(xᵢ−x̄)²·Σ(yᵢ−ȳ)²]</td><td>Correlación de Pearson (lineal).</td></tr>
+  <tr><td>ρ = 1 − 6Σdᵢ²/[n(n²−1)]</td><td>Correlación de Spearman (monótona).</td></tr>
+  <tr><td>ŷ = β₀ + β₁x₁ + … + βₚxₚ</td><td>Modelo de regresión múltiple.</td></tr>
+  <tr><td>β = (XᵀX)⁻¹Xᵀy</td><td>Solución OLS de los coeficientes.</td></tr>
+  <tr><td>R² = 1 − Σ(yᵢ−ŷᵢ)²/Σ(yᵢ−ȳ)²</td><td>Bondad de ajuste del modelo.</td></tr>
+  <tr><td>WCSS = ΣₖΣ‖xᵢ−μₖ‖²</td><td>Inercia que minimiza K-means.</td></tr>
+  <tr><td>z = (x−μ)/σ</td><td>Estandarización (escalar variables).</td></tr>
+</table>
+
+<h2>Referencias (APA 7)</h2>
+<p class="small">
+Cawley, J., &amp; Meyerhoefer, C. (2012). The medical care costs of obesity: An instrumental variables approach. <em>Journal of Health Economics, 31</em>(1), 219–230. https://doi.org/10.1016/j.jhealeco.2011.10.003<br><br>
+Chapman, P., Clinton, J., Kerber, R., Khabaza, T., Reinartz, T., Shearer, C., &amp; Wirth, R. (2000). <em>CRISP-DM 1.0: Step-by-step data mining guide</em>. SPSS Inc.<br><br>
+Feng, C., Wang, H., Lu, N., Chen, T., He, H., Lu, Y., &amp; Tu, X. M. (2014). Log-transformation and its implications for data analysis. <em>Shanghai Archives of Psychiatry, 26</em>(2), 105–109. https://doi.org/10.3969/j.issn.1002-0829.2014.02.009<br><br>
+James, G., Witten, D., Hastie, T., &amp; Tibshirani, R. (2021). <em>An introduction to statistical learning</em> (2nd ed.). Springer. https://doi.org/10.1007/978-1-0716-1418-1<br><br>
+Knaflic, C. N. (2015). <em>Storytelling with data: A data visualization guide for business professionals</em>. Wiley.<br><br>
+Lantz, B. (2019). <em>Machine learning with R</em> (3rd ed.). Packt Publishing.<br><br>
+Lloyd, S. P. (1982). Least squares quantization in PCM. <em>IEEE Transactions on Information Theory, 28</em>(2), 129–137. https://doi.org/10.1109/TIT.1982.1056489<br><br>
+Pedregosa, F., Varoquaux, G., Gramfort, A., Michel, V., Thirion, B., Grisel, O., … Duchesnay, É. (2011). Scikit-learn: Machine learning in Python. <em>Journal of Machine Learning Research, 12</em>, 2825–2830.<br><br>
+Rousseeuw, P. J. (1987). Silhouettes: A graphical aid to the interpretation and validation of cluster analysis. <em>Journal of Computational and Applied Mathematics, 20</em>, 53–65. https://doi.org/10.1016/0377-0427(87)90125-7<br><br>
+Schober, P., Boer, C., &amp; Schwarte, L. A. (2018). Correlation coefficients: Appropriate use and interpretation. <em>Anesthesia &amp; Analgesia, 126</em>(5), 1763–1768. https://doi.org/10.1213/ANE.0000000000002864<br><br>
+Seabold, S., &amp; Perktold, J. (2010). Statsmodels: Econometric and statistical modeling with Python. <em>Proceedings of the 9th Python in Science Conference</em>, 92–96. https://doi.org/10.25080/Majora-92bf1922-011<br><br>
+Tukey, J. W. (1977). <em>Exploratory data analysis</em>. Addison-Wesley.<br><br>
+Xu, X., Bishop, E. E., Kennedy, S. M., Simpson, S. A., &amp; Pechacek, T. F. (2015). Annual healthcare spending attributable to cigarette smoking: An update. <em>American Journal of Preventive Medicine, 48</em>(3), 326–333. https://doi.org/10.1016/j.amepre.2014.10.012
+</p>
+
+</body>
+</html>
